@@ -45,7 +45,7 @@ const Index = () => {
       {/* Header */}
       <div className="flex justify-between items-center p-4 border-b border-white">
         <div className="flex items-center gap-3">
-          <h1 className="font-poppins font-black text-xl tracking-tighter">HUMANITY ZERO</h1>
+          <h1 className="font-poppins font-black text-xl tracking-tighter">BETRAYER.</h1>
           <div className="text-sm text-gray-400">
             {getModelDisplayName(config.model)}
             {config.thinking && ' • Thinking'}
