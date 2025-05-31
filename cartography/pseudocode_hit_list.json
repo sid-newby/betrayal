@@ -1,0 +1,110 @@
+{
+  "critical_violations": [
+    {
+      "location": "src/hooks/useAnthropicChat.ts:33-41",
+      "type": "fake_implementation",
+      "description": "Simulated API response instead of real Anthropic integration",
+      "risk": "Production readiness blocked",
+      "fix_priority": "P0",
+      "required_implementation": "Anthropic API client with proper error handling"
+    },
+    {
+      "location": "src/hooks/useAnthropicChat.ts:47-49",
+      "type": "unsafe_global",
+      "description": "Direct window object access for speech synthesis",
+      "risk": "Type safety violation, runtime errors",
+      "fix_priority": "P0",
+      "required_implementation": "Proper speech synthesis service with TypeScript types"
+    }
+  ],
+  "high_risk_stubs": [
+    {
+      "location": "src/hooks/useAnthropicChat.ts:38-41",
+      "type": "placeholder_response",
+      "description": "Hardcoded message response template",
+      "dependencies": ["Anthropic API integration"],
+      "fix_priority": "P1"
+    },
+    {
+      "location": "src/components/MicrophoneButton.tsx",
+      "type": "incomplete_feature",
+      "description": "Speech recognition implementation missing",
+      "dependencies": ["Web Speech API", "Error handling"],
+      "fix_priority": "P1"
+    }
+  ],
+  "missing_core_features": [
+    {
+      "feature": "Supabase Authentication",
+      "status": "Not implemented",
+      "blocking": true,
+      "required_files": [
+        "src/lib/supabase.ts",
+        "src/hooks/useAuth.ts",
+        "src/components/AuthGuard.tsx"
+      ]
+    },
+    {
+      "feature": "Vector Store Integration",
+      "status": "Not implemented",
+      "blocking": true,
+      "required_files": [
+        "src/lib/vectorStore.ts",
+        "src/hooks/useVectorStore.ts",
+        "src/services/embeddings.ts"
+      ]
+    },
+    {
+      "feature": "MCP Proxy Integration",
+      "status": "Not implemented",
+      "blocking": true,
+      "required_files": [
+        "src/lib/mcpProxy.ts",
+        "src/services/mcpConnection.ts"
+      ]
+    }
+  ],
+  "technical_debt": [
+    {
+      "location": "src/hooks/useAnthropicChat.ts",
+      "type": "local_state",
+      "description": "Message state should be centralized",
+      "fix_priority": "P2",
+      "migration_path": "Move to global state management"
+    },
+    {
+      "location": "src/pages/Index.tsx",
+      "type": "local_state",
+      "description": "Config state should be centralized",
+      "fix_priority": "P2",
+      "migration_path": "Move to global state management"
+    }
+  ],
+  "action_items": [
+    {
+      "priority": "P0",
+      "task": "Implement real Anthropic API integration",
+      "files_to_create": [
+        "src/services/anthropic.ts",
+        "src/hooks/useAnthropicClient.ts"
+      ]
+    },
+    {
+      "priority": "P0",
+      "task": "Implement proper speech services",
+      "files_to_create": [
+        "src/services/speech.ts",
+        "src/hooks/useSpeechSynthesis.ts",
+        "src/hooks/useSpeechRecognition.ts"
+      ]
+    },
+    {
+      "priority": "P1",
+      "task": "Implement authentication flow",
+      "files_to_create": [
+        "src/lib/supabase.ts",
+        "src/hooks/useAuth.ts"
+      ]
+    }
+  ]
+}

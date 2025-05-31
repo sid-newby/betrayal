@@ -1,0 +1,61 @@
+graph TD
+    %% Current Architecture
+    subgraph "Current (Problematic)"
+        A1[Index.tsx] -->|manages all| B1["Local State"]
+        A1 -->|renders| C1["UI Components"]
+        A1 -->|uses| D1["useAnthropicChat<br/>(pseudocode)"]
+        D1 -->|unsafe| E1["window.speakText"]
+    end
+
+    %% Proposed Clean Architecture
+    subgraph "Target Architecture"
+        %% Core Services
+        A2[App.tsx] -->|initializes| B2["Service Container"]
+        B2 -->|provides| C2["Anthropic Service"]
+        B2 -->|provides| D2["Speech Service"]
+        B2 -->|provides| E2["Vector Store"]
+        B2 -->|provides| F2["Auth Service"]
+
+        %% State Management
+        G2["Global Store"] -->|manages| H2["Message State"]
+        G2 -->|manages| I2["Config State"]
+        G2 -->|manages| J2["Audio State"]
+
+        %% UI Layer
+        K2["Chat Container"] -->|uses| C2
+        K2 -->|subscribes| G2
+        L2["Audio Controls"] -->|uses| D2
+        L2 -->|subscribes| G2
+        M2["Settings Panel"] -->|uses| G2
+
+        %% Data Flow
+        C2 -->|streams to| N2["Message Handler"]
+        N2 -->|updates| G2
+        E2 -->|enhances| C2
+        F2 -->|protects| K2
+    end
+
+    %% Migration Path
+    subgraph "Phase 1: Services"
+        P1["Extract Services"] -->|creates| Q1["Type-Safe APIs"]
+        Q1 -->|enables| R1["Remove Pseudocode"]
+    end
+
+    subgraph "Phase 2: State"
+        S1["Implement Store"] -->|centralizes| T1["Global State"]
+        T1 -->|removes| U1["Local State"]
+    end
+
+    subgraph "Phase 3: Components"
+        V1["Split Components"] -->|creates| W1["Clean Boundaries"]
+        W1 -->|enables| X1["Pure UI"]
+    end
+
+    %% Style Overrides
+    classDef critical fill:#ff6b6b,stroke:#333,stroke-width:2px
+    classDef warning fill:#ffd93d,stroke:#333,stroke-width:2px
+    classDef success fill:#6bff6b,stroke:#333,stroke-width:2px
+
+    class D1,E1 critical
+    class B1 warning
+    class Q1,T1,X1 success

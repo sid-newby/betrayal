@@ -1,0 +1,51 @@
+graph TD
+    %% Core Application Flow
+    A[App.tsx] -->|routes to| B[Index.tsx]
+    B -->|uses| C[useAnthropicChat]
+    
+    %% Chat Components
+    B -->|renders| D[ChatMessage]
+    B -->|renders| E[ChatInput]
+    B -->|renders| F[MicrophoneButton]
+    B -->|renders| G[SettingsDrawer]
+    
+    %% State Management
+    C -->|manages| H["Local Message State<br/>(needs centralization)"]
+    G -->|manages| I["Config State<br/>(needs centralization)"]
+    
+    %% Model Integration
+    C -->|simulated| J["Anthropic API<br/>(pseudocode)"]
+    C -->|uses| K["Window.speakText<br/>(unsafe global)"]
+    
+    %% Audio Handling
+    F -->|controls| L["Speech Recognition<br/>(incomplete)"]
+    F -->|triggers| M["Speech Synthesis<br/>(incomplete)"]
+    
+    %% Data Flow
+    N["Supabase Auth<br/>(not implemented)"] -.->|planned| B
+    O["Vector Store<br/>(not implemented)"] -.->|planned| C
+    
+    %% Style Dependencies
+    P[App.css] -->|styles| B
+    Q[tailwind] -->|styles| B
+
+    %% Critical Issues
+    subgraph "Pseudocode Implementations"
+        J
+        K
+        L
+        M
+    end
+
+    subgraph "Missing Core Features"
+        N
+        O
+    end
+
+    %% Coupling Issues
+    style H fill:#ff6b6b
+    style I fill:#ff6b6b
+    style J fill:#ffd93d
+    style K fill:#ff6b6b
+    style L fill:#ffd93d
+    style M fill:#ffd93d

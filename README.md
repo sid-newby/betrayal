@@ -1,5 +1,21 @@
 # HUMANITYZERO.
 ## Betrayal Can Never Be Forgiven. 
+![BETRAY](humanityzero/public/Into-my-flesh-we-shall-grow-as-one.gif)
+
+This project is built with:
+
+- Vite
+- TypeScript
+- React
+- shadcn-ui
+- Tailwind CSS
+- Anthropic
+- Supabase
+- MCP Proxy
+- Radix
+- Dotenv
+- Deepgram
+- Cartesia
 
 A chat based agentic web app usong typescript, tailwind, shadcn, radix, dotenv, and microphone button that serves as both the microphone and speaker chrome browser gesture. its a toggle. 
 
@@ -17,9 +33,20 @@ the drawer is black with a 1px white stroke. white text. accent and buttons are 
 options are system prompt, which applies the system prompt for all models. supabase provides the login. 
 credentials for supabase and models are kept in an .env file. 
 
+An MCP proxy will be implemented for easy connectivity to MCP servers that use streaming or stdio transport. 
+staging/mcp-proxy-main/README.md
+
 We're using anthropic for our main model. choices on the drawer for model are Sonnet 4 and Opus 4. There is a checkbox for thinking, which affects both models. a field appears on click that allows the budget to be configured for thinking tokens. 
 
+We will build a react hook to catch all requests to and responses from the model as user and star, sending them to openai's text-embedding-small embedder model, then loading the embeddings to the supabase vector store. 
+
+the user's context + the model's response context will be carefully summarized as to maintain the most relevant context, used as a subconsious semantic query to the supabase vector store, returning top 5 results to the model in it's own context. this context will appear in a chat object in red as simply '⛧⃝'. If this object is clicked, it will display the context in a card component. The card will be styled to match the rest of the app, replacing the color white with red in this instance. the context will be queried across the entire vector store regardless of role, user or star. 
+
+in this way the agent need not perform semantic search to remember previous interactions.  However there may be times wherein the agent will want to save specific context to the vector store, or to retrieve specific context using it's own semantic query. Tools will be provided to the agent that allow it to perform these actions using the same features available through general subconsious actions.
+
 We've got two models here from anthropic. claude-sonnet-4 and claude-opus-4. We have both thinking and non thinking variants. The major difference is we run at temperature 0 by default, but if we're thinking, we run at temperature 1. Also, in thinking mode, we have a budget allocated for thinking tokens. 
+
+When the model is thinking, we will present a 'Thinking' chat bubble above the model's response, in anticipation of the model's final response. The thinking context should be in blue, italicised, in a much smaller font size using Inter. Much like the '⛧⃝' object, it should be clickable, and will display the context in a card component. The card will be styled to match the rest of the app, replacing the color white with blue in this instance.  Thinking context should be presented in real time using canonical streaming methodology. see staging/anthropic-thinking.md
 
 We default to sonnet-4 without thinking enabled. 
 example code for the 2 variants in both thinking and non thinking modes are provided below. 
