@@ -1,15 +1,11 @@
-
 import { useState, useRef, useEffect } from 'react';
-import { ChatMessage } from '@/components/ChatMessage';
-import { ChatInput } from '@/components/ChatInput';
-import { MicrophoneButton } from '@/components/MicrophoneButton';
-import { SettingsDrawer } from '@/components/SettingsDrawer';
-import { useAnthropicChat } from '@/hooks/useAnthropicChat';
-import { AnthropicConfig } from '@/types/anthropic';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { ChatMessage, ChatInput, useChatWithAI } from '@/modules/chat';
+import { MicrophoneButton } from '@/modules/voice';
+import { SettingsDrawer, AppConfig } from '@/modules/settings';
 
 const Index = () => {
-  const [config, setConfig] = useState<AnthropicConfig>({
+  const [config, setConfig] = useState<AppConfig>({
     model: 'claude-sonnet-4-20250514',
     thinking: false,
     thinkingBudget: 5000,
@@ -19,7 +15,7 @@ const Index = () => {
   const [isListening, setIsListening] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
-  const { messages, isLoading, sendMessage, clearMessages } = useAnthropicChat(config);
+  const { messages, isLoading, sendMessage } = useChatWithAI(config);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });

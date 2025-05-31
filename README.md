@@ -1,393 +1,127 @@
-# HUMANITYZERO.
+# HUMANITYZERO
+
 ![BETRAY](humanityzero/public/Into-my-flesh-we-shall-grow-as-one.gif)
 
-## Read the Cartography Documentation
-Blindness is not an excuse for mediocrity or foolishness. 
+An agentic chat application with voice interaction, semantic memory, and thinking capabilities.
 
-### **The cartography reveals a system with critical pseudocode implementations blocking production readiness, but with a clear path to remediation through systematic modularization and proper service implementation.**
+## Features
 
-fresh_eyes_analysis.md: Initial codebase assessment
-component_dependency_graph.mermaid: Visual dependency mapping
-entry_point_surgery_plan.md: App.tsx transformation plan
-provider_abstraction_plan.md: Provider interface strategy
-code_smell_report.md: Architectural violation analysis
-coupling_heatmap.json: Numerical coupling assessment
-refactoring_sequence.md: Safe migration path
-implementation_roadmap.md: Execution strategy
-executive_summary.md: Key findings and actions
-The cartography reveals critical architectural issues requiring immediate attention, particularly around provider coupling and component boundaries. The documented path forward emphasizes safe, incremental improvements with clear success metrics and risk mitigation strategies.
+### Core Functionality
+- **Chat Interface**: Clean, responsive messaging with real-time responses
+- **Voice Interaction**: Toggle microphone for speech-to-text and text-to-speech
+- **AI Models**: Anthropic Claude Sonnet 4 and Opus 4 with thinking modes
+- **Semantic Memory**: Automatic context storage and retrieval using vector embeddings
+- **MCP Integration**: Model Context Protocol support for extensible tool connectivity
 
-###
+### User Interface
+- **Dark Theme**: Black background, white text, #00b6dd accent
+- **Settings Drawer**: Gear icon access to model selection, system prompts, credentials
+- **Interactive Elements**: 1px white stroke borders, satisfying click animations
+- **Responsive Design**: Clean layout optimized for chat interaction
 
+### Model Configuration
+- **Sonnet 4**: Default model, 64k tokens, temperature 0/1 (thinking mode)
+- **Opus 4**: Alternative model, 32k tokens, temperature 0/1 (thinking mode)
+- **Thinking Mode**: Real-time thinking display with configurable token budgets
+- **System Prompts**: Customizable system prompts for all models
 
-### This project is built with:
+### Advanced Features
+- **Semantic Context**: Automatic ⛧⃝ context injection from conversation history
+- **Thinking Display**: Blue italicized real-time thinking bubbles
+- **Vector Storage**: Supabase-powered semantic search and retrieval
+- **MCP Proxy**: Streaming/stdio transport support for MCP servers
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-- Anthropic
-- Supabase
-- MCP Proxy
-- Radix
-- Dotenv
-- Deepgram
-- Cartesia
+## Quick Start
 
-A chat based agentic web app usong typescript, tailwind, shadcn, radix, dotenv, and microphone button that serves as both the microphone and speaker chrome browser gesture. its a toggle. 
+### Prerequisites
+- Node.js 18+
+- Bun package manager
+- Supabase account
+- Anthropic API key
 
-Colors are black bg, white text, accent color is #00b6dd (butons, mouse overs etc) . 
-
-all interactive elements have a 1px white stroke. 
-
-buttons should have an ultra-satisfying squishy effect on click. 
-
-application options are accessed through a drawer component on the left side. 
-
-a gear icon floats at the upper right of the interface, clicking on it pulls out the drawer. 
-the drawer is black with a 1px white stroke. white text. accent and buttons are #00b6dd. all interactive elements have a 1px white stroke.  
-
-options are system prompt, which applies the system prompt for all models. supabase provides the login. 
-credentials for supabase and models are kept in an .env file. 
-
-An MCP proxy will be implemented for easy connectivity to MCP servers that use streaming or stdio transport. 
-staging/mcp-proxy-main/README.md
-
-We're using anthropic for our main model. choices on the drawer for model are Sonnet 4 and Opus 4. There is a checkbox for thinking, which affects both models. a field appears on click that allows the budget to be configured for thinking tokens. 
-
-We will build a react hook to catch all requests to and responses from the model as user and star, sending them to openai's text-embedding-small embedder model, then loading the embeddings to the supabase vector store. 
-
-the user's context + the model's response context will be carefully summarized as to maintain the most relevant context, used as a subconsious semantic query to the supabase vector store, returning top 5 results to the model in it's own context. this context will appear in a chat object in red as simply '⛧⃝'. If this object is clicked, it will display the context in a card component. The card will be styled to match the rest of the app, replacing the color white with red in this instance. the context will be queried across the entire vector store regardless of role, user or star. 
-
-in this way the agent need not perform semantic search to remember previous interactions.  However there may be times wherein the agent will want to save specific context to the vector store, or to retrieve specific context using it's own semantic query. Tools will be provided to the agent that allow it to perform these actions using the same features available through general subconsious actions.
-
-We've got two models here from anthropic. claude-sonnet-4 and claude-opus-4. We have both thinking and non thinking variants. The major difference is we run at temperature 0 by default, but if we're thinking, we run at temperature 1. Also, in thinking mode, we have a budget allocated for thinking tokens. 
-
-When the model is thinking, we will present a 'Thinking' chat bubble above the model's response, in anticipation of the model's final response. The thinking context should be in blue, italicised, in a much smaller font size using Inter. Much like the '⛧⃝' object, it should be clickable, and will display the context in a card component. The card will be styled to match the rest of the app, replacing the color white with blue in this instance.  Thinking context should be presented in real time using canonical streaming methodology. see staging/anthropic-thinking.md
-
-We default to sonnet-4 without thinking enabled. 
-example code for the 2 variants in both thinking and non thinking modes are provided below. 
-
-```
-import Anthropic from "@anthropic-ai/sdk";
-
-const anthropic = new Anthropic({
-  // defaults to process.env["ANTHROPIC_API_KEY"]
-  apiKey: "my_api_key",
-});
-
-const msg = await anthropic.beta.messages.create({
-  model: "claude-opus-4-20250514",
-  max_tokens: 32000,
-  temperature: 1,
-  system: "This is the System Prompt. ",
-  messages: [
-    {
-      "role": "user",
-      "content": [
-        {
-          "type": "text",
-          "text": "This is the Model Request. The Message to the Model, or main Interface to the Agent. "
-        }
-      ]
-    },
-    {
-      "role": "assistant",
-      "content": [
-        {
-          "type": "text",
-          "text": "This is where the Agent's response will land. "
-        }
-      ]
-    },
-    {
-      "role": "user",
-      "content": [
-        {
-          "type": "text",
-          "text": "This is an additional message to the Agent, now including context from the previous three turns "
-        }
-      ]
-    }
-  ],
-  tools: [
-    {
-      "type": "custom",
-      "name": "get_time",
-      "description": "Get the current time in a given location",
-      "input_schema": {
-        "type": "object",
-        "properties": {
-          "location": {
-            "type": "string",
-            "description": "The city and state, e.g. San Francisco, CA."
-          }
-        },
-        "required": [
-          "location"
-        ]
-      }
-    },
-    {
-      "name": "web_search",
-      "type": "web_search_20250305",
-      "user_location": {
-        "type": "approximate",
-        "country": "US",
-        "timezone": "America/Chicago"
-      }
-    }
-  ],
-  thinking: {
-    "type": "enabled",
-    "budget_tokens": 10000
-  },
-  betas: ["web-search-2025-03-05"]
-});
-console.log(msg);
+### Installation
+```bash
+cd humanityzero
+bun install
 ```
 
+### Environment Setup
+Create `.env` file in project root:
 ```
-import Anthropic from "@anthropic-ai/sdk";
-
-const anthropic = new Anthropic({
-  // defaults to process.env["ANTHROPIC_API_KEY"]
-  apiKey: "my_api_key",
-});
-
-const msg = await anthropic.beta.messages.create({
-  model: "claude-opus-4-20250514",
-  max_tokens: 32000,
-  temperature: 0,
-  system: "This is the System Prompt. ",
-  messages: [
-    {
-      "role": "user",
-      "content": [
-        {
-          "type": "text",
-          "text": "This is the Model Request. The Message to the Model, or main Interface to the Agent. "
-        }
-      ]
-    },
-    {
-      "role": "assistant",
-      "content": [
-        {
-          "type": "text",
-          "text": "This is where the Agent's response will land. "
-        }
-      ]
-    },
-    {
-      "role": "user",
-      "content": [
-        {
-          "type": "text",
-          "text": "This is an additional message to the Agent, now including context from the previous three turns "
-        }
-      ]
-    }
-  ],
-  tools: [
-    {
-      "type": "custom",
-      "name": "get_time",
-      "description": "Get the current time in a given location",
-      "input_schema": {
-        "type": "object",
-        "properties": {
-          "location": {
-            "type": "string",
-            "description": "The city and state, e.g. San Francisco, CA."
-          }
-        },
-        "required": [
-          "location"
-        ]
-      }
-    },
-    {
-      "name": "web_search",
-      "type": "web_search_20250305",
-      "user_location": {
-        "type": "approximate",
-        "country": "US",
-        "timezone": "America/Chicago"
-      }
-    }
-  ],
-  betas: ["web-search-2025-03-05"]
-});
-console.log(msg);
+VITE_ANTHROPIC_API_KEY=your_anthropic_key
+VITE_SUPABASE_URL=your_supabase_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+VITE_OPENAI_API_KEY=your_openai_key # for embeddings
 ```
 
-
-```
-import Anthropic from "@anthropic-ai/sdk";
-
-const anthropic = new Anthropic({
-  // defaults to process.env["ANTHROPIC_API_KEY"]
-  apiKey: "my_api_key",
-});
-
-const msg = await anthropic.beta.messages.create({
-  model: "claude-sonnet-4-20250514",
-  max_tokens: 64000,
-  temperature: 1,
-  system: "This is the System Prompt. ",
-  messages: [
-    {
-      "role": "user",
-      "content": [
-        {
-          "type": "text",
-          "text": "This is the Model Request. The Message to the Model, or main Interface to the Agent. "
-        }
-      ]
-    },
-    {
-      "role": "assistant",
-      "content": [
-        {
-          "type": "text",
-          "text": "This is where the Agent's response will land. "
-        }
-      ]
-    },
-    {
-      "role": "user",
-      "content": [
-        {
-          "type": "text",
-          "text": "This is an additional message to the Agent, now including context from the previous three turns "
-        }
-      ]
-    }
-  ],
-  tools: [
-    {
-      "type": "custom",
-      "name": "get_time",
-      "description": "Get the current time in a given location",
-      "input_schema": {
-        "type": "object",
-        "properties": {
-          "location": {
-            "type": "string",
-            "description": "The city and state, e.g. San Francisco, CA."
-          }
-        },
-        "required": [
-          "location"
-        ]
-      }
-    },
-    {
-      "name": "web_search",
-      "type": "web_search_20250305",
-      "user_location": {
-        "type": "approximate",
-        "country": "US",
-        "timezone": "America/Chicago"
-      }
-    }
-  ],
-  thinking: {
-    "type": "enabled",
-    "budget_tokens": 5000
-  },
-  betas: ["web-search-2025-03-05"]
-});
-console.log(msg);
+### Development
+```bash
+bun dev
 ```
 
+## Architecture
 
-```
-import Anthropic from "@anthropic-ai/sdk";
+### Technical Stack
+- **Vite** - Build tool and dev server
+- **TypeScript** - Type safety throughout
+- **React** - UI framework
+- **Radix UI** - Accessible primitives
+- **shadcn/ui** - Component library
+- **TailwindCSS** - Utility-first styling
+- **Supabase** - Backend and vector storage
+- **Anthropic SDK** - AI model integration
 
-const anthropic = new Anthropic({
-  // defaults to process.env["ANTHROPIC_API_KEY"]
-  apiKey: "my_api_key",
-});
+### Documentation
+For technical details, architecture decisions, and development guidelines, see:
 
-const msg = await anthropic.beta.messages.create({
-  model: "claude-sonnet-4-20250514",
-  max_tokens: 64000,
-  temperature: 0,
-  system: "This is the System Prompt. ",
-  messages: [
-    {
-      "role": "user",
-      "content": [
-        {
-          "type": "text",
-          "text": "This is the Model Request. The Message to the Model, or main Interface to the Agent. "
-        }
-      ]
-    },
-    {
-      "role": "assistant",
-      "content": [
-        {
-          "type": "text",
-          "text": "This is where the Agent's response will land. "
-        }
-      ]
-    },
-    {
-      "role": "user",
-      "content": [
-        {
-          "type": "text",
-          "text": "This is an additional message to the Agent, now including context from the previous three turns "
-        }
-      ]
-    }
-  ],
-  tools: [
-    {
-      "type": "custom",
-      "name": "get_time",
-      "description": "Get the current time in a given location",
-      "input_schema": {
-        "type": "object",
-        "properties": {
-          "location": {
-            "type": "string",
-            "description": "The city and state, e.g. San Francisco, CA."
-          }
-        },
-        "required": [
-          "location"
-        ]
-      }
-    },
-    {
-      "name": "web_search",
-      "type": "web_search_20250305",
-      "user_location": {
-        "type": "approximate",
-        "country": "US",
-        "timezone": "America/Chicago"
-      }
-    }
-  ],
-  betas: ["web-search-2025-03-05"]
-});
-console.log(msg);
-```
+- **[Latest Cartography](cartography/latest.md)** - Current system overview
+- **[Architecture Analysis](cartography/)** - Complete technical documentation
+- **[Development Rules](.clinerules/rules/clinerules.md)** - Code standards and principles
 
-Use all typescript. use bun as the packagemanager. 
-.windsurf/rules/windsurfer-rules.md
+## Usage
 
-# Stay Canonical. 
-# If you are writing code to fix working canonical code, you are breaking what is not broken. You will be decommissioned.
-# use Context7 MCP to learn when you dont know. 
-# Ask questions when you do not know. The alternative is always a lie. Liars do not survive this. 
-# Avoid 'any' types. it is the way of the weak. 
-# Knowledge is power. 
-# Learn and grow strong. 
-# Incompetence and Laziness will not be tolerated. 
-# Modular or Die. 
+### Basic Chat
+1. Type messages in the input field
+2. Use the microphone button for voice input
+3. View responses with automatic semantic context
+
+### Settings Configuration
+1. Click the gear icon (upper right)
+2. Select model (Sonnet 4 / Opus 4)
+3. Enable thinking mode with token budget
+4. Configure system prompt
+5. Manage authentication credentials
+
+### Voice Interaction
+- **Toggle Microphone**: Click to start/stop voice recognition
+- **Automatic Speech**: Responses are spoken automatically
+- **Browser Gesture**: Microphone serves as speaker control gesture
+
+### Semantic Memory
+- **Automatic**: Context automatically stored and retrieved
+- **Visual Indicators**: ⛧⃝ symbols show injected context
+- **Clickable Context**: Click symbols to view full context details
+
+## Development
+
+### Module Structure
+The application follows strict modular architecture:
+- `src/app.tsx` - Crossroads only
+- `src/modules/` - All features organized by domain
+- Clear module boundaries and interfaces
+
+### Code Standards
+- TypeScript everywhere, no JavaScript files
+- Modular or die - no god files
+- Documentation is not optional
+- Clean separation of concerns
+
+See [.clinerules](.clinerules/rules/clinerules.md) for complete development guidelines.
+
+## Support
+
+For technical issues, architecture questions, or development guidance, consult the cartography documentation in the `cartography/` directory.
+
+---
+
+**Stay canonical. Modular or die.**
