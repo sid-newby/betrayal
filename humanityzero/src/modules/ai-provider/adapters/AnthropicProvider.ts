@@ -8,13 +8,27 @@ export class AnthropicProvider implements AIProvider {
   supportedModels = ['claude-sonnet-4-20250514', 'claude-opus-4-20250514'];
 
   constructor() {
+    const apiKey = import.meta.env.VITE_ANTHROPIC_API_KEY;
+    if (!apiKey || apiKey === 'your_anthropic_key_here') {
+      console.warn('VITE_ANTHROPIC_API_KEY not found or not set. Please add your Anthropic API key to the .env file.');
+    }
+    
     this.client = new Anthropic({
-      apiKey: import.meta.env.VITE_ANTHROPIC_API_KEY,
+      apiKey: apiKey || 'dummy-key',
       dangerouslyAllowBrowser: true,
     });
   }
 
   async sendMessage(messages: AIMessage[], config: AIConfig): Promise<AIResponse> {
+    const apiKey = import.meta.env.VITE_ANTHROPIC_API_KEY;
+    if (!apiKey || apiKey === 'your_anthropic_key_here') {
+      return {
+        id: Date.now().toString(),
+        content: '🔑 API Key Required: Please add your Anthropic API key to the .env file as VITE_ANTHROPIC_API_KEY to enable AI chat functionality. You can get an API key from https://console.anthropic.com/',
+        stopReason: 'no_api_key',
+      };
+    }
+    
     try {
       // Convert to Anthropic format
       const anthropicMessages: Anthropic.Beta.Messages.MessageCreateParams['messages'] = messages.map(msg => ({
@@ -31,6 +45,7 @@ export class AnthropicProvider implements AIProvider {
         temperature: config.thinking ? 1 : 0,
         system: systemPrompt,
         messages: anthropicMessages,
+        stream: true,
       };
 
       if (config.thinking && config.thinkingBudget) {
@@ -40,32 +55,46 @@ export class AnthropicProvider implements AIProvider {
         };
       }
 
-      const response = await this.client.beta.messages.create({
-        ...apiParams,
-        stream: false,
-      });
+      const stream = await this.client.beta.messages.create(apiParams);
+      
+      let content = '';
+      let responseId = '';
+      let stopReason: string | undefined;
+      let usage: { inputTokens: number; outputTokens: number } | undefined;
 
-      let content = 'Sorry, I could not get a valid response from the assistant.';
-      if (response.content && response.content.length > 0) {
-        const firstBlock = response.content[0];
-        if (firstBlock.type === 'text') {
-          content = firstBlock.text;
-        } else if (firstBlock.type === 'tool_use') {
-          content = `Assistant wants to use the '${firstBlock.name}' tool. Tool handling is not yet fully implemented.`;
-          console.log('Tool use requested by assistant:', firstBlock);
+      for await (const chunk of stream) {
+        if (chunk.type === 'message_start') {
+          responseId = chunk.message.id;
+          if (chunk.message.usage) {
+            usage = {
+              inputTokens: chunk.message.usage.input_tokens,
+              outputTokens: chunk.message.usage.output_tokens,
+            };
+          }
+        } else if (chunk.type === 'content_block_delta') {
+          if (chunk.delta.type === 'text_delta') {
+            content += chunk.delta.text;
+          }
+        } else if (chunk.type === 'message_delta') {
+          stopReason = chunk.delta.stop_reason || undefined;
+          if (chunk.usage) {
+            usage = {
+              inputTokens: usage?.inputTokens || 0,
+              outputTokens: chunk.usage.output_tokens,
+            };
+          }
         }
-      } else if (response.stop_reason) {
-        content = `Message generation stopped due to: ${response.stop_reason}.`;
+      }
+
+      if (!content) {
+        content = 'Sorry, I could not get a valid response from the assistant.';
       }
 
       return {
-        id: response.id || Date.now().toString(),
+        id: responseId || Date.now().toString(),
         content,
-        stopReason: response.stop_reason || undefined,
-        usage: response.usage ? {
-          inputTokens: response.usage.input_tokens,
-          outputTokens: response.usage.output_tokens,
-        } : undefined,
+        stopReason,
+        usage,
       };
     } catch (error) {
       console.error('Anthropic API error:', error);

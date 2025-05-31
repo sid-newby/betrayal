@@ -11,7 +11,7 @@ export const useChatState = () => {
 
   const addUserMessage = useCallback((content: string): Message => {
     const message: Message = {
-      id: Date.now().toString(),
+      id: `user-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       role: 'user',
       content,
       timestamp: new Date(),
@@ -22,7 +22,7 @@ export const useChatState = () => {
 
   const addAssistantMessage = useCallback((content: string, id?: string): Message => {
     const message: Message = {
-      id: id || (Date.now() + 1).toString(),
+      id: id || `assistant-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       role: 'assistant',
       content,
       timestamp: new Date(),
