@@ -1,5 +1,4 @@
 # HUMANITYZERO.
-## Betrayal Can Never Be Forgiven. 
 ![BETRAY](humanityzero/public/Into-my-flesh-we-shall-grow-as-one.gif)
 
 This project is built with:
