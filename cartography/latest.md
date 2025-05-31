@@ -58,6 +58,17 @@ project-root/
 │   │   │   │   │   └── index.ts
 │   │   │   │   └── index.ts
 │   │   │   ├── memory/          # Ready for semantic memory
+│   │   │   ├── mcp/             # MCP server management ✅ NEW
+│   │   │   │   ├── components/
+│   │   │   │   │   └── MCPServerManager.tsx
+│   │   │   │   ├── hooks/
+│   │   │   │   │   └── useMCPProxy.ts
+│   │   │   │   ├── services/
+│   │   │   │   │   ├── mcpProxyService.ts
+│   │   │   │   │   └── mcpToolIntegration.ts ✅ AI BRIDGE
+│   │   │   │   ├── types/
+│   │   │   │   │   └── index.ts
+│   │   │   │   └── index.ts
 │   │   │   └── ui/              # Shared UI components
 │   │   └── components/ui/       # shadcn components ✅
 └── cartography/                 # Documentation ✅
@@ -71,7 +82,8 @@ project-root/
 3. **ai-provider**: Provider abstraction layer (Anthropic implemented)
 4. **settings**: Configuration management, model selection, persistence
 5. **memory**: Ready for semantic storage/retrieval 
-6. **ui**: Shared interface components
+6. **mcp**: Model Context Protocol server management and proxy integration ✅ NEW
+7. **ui**: Shared interface components
 
 ### Module Dependency Graph
 ```mermaid
@@ -82,10 +94,20 @@ graph TD
     B -->|uses| E[ai-provider module]
     B -->|uses| F[voice module]
     D -->|configures| E
+    D -->|includes| H[mcp module]
+    H -->|manages| I[MCP Servers]
+    H -->|provides| J[MCP Proxy]
+    H -->|integrates tools to| E
+    E -->|uses MCP tools via| H
     
     %% Clean module boundaries
     B -.->|no direct coupling| G[Anthropic SDK]
     E -->|abstracts| G
+    H -.->|no direct coupling| K[mcp-proxy package]
+    
+    %% MCP Tool Flow
+    E -->|tool calls| H
+    H -->|tool results| E
 ```
 
 ## Implementation Status
@@ -98,6 +120,16 @@ graph TD
 - **Settings Module**: Model selection, thinking mode, system prompts
 - **Settings Persistence**: Configuration persists across sessions via localStorage
 - **Provider Independence**: No direct coupling to Anthropic SDK
+- **MCP Integration**: Complete Model Context Protocol server management with AI agent bridge ✅ NEW
+  - Server registration and configuration
+  - Proxy lifecycle management (start/stop)
+  - Real-time capabilities discovery
+  - Integrated UI in settings drawer with tabs
+  - **AI Agent Integration**: MCP tools automatically available to Claude ✅ CRITICAL
+    - Tool-aware system prompt generation
+    - Automatic tool calling and execution
+    - Tool result handling and conversation flow
+    - Real-time tool availability updates
 - **Web Search Integration**: Native internet access through Anthropic's canonical web search tools
   - All 4 Claude models (Opus/Sonnet 4, with/without thinking) equipped with web search
   - Proper configuration with rate limiting (max 5 searches per conversation)
@@ -124,6 +156,8 @@ graph TD
 7. **Module Communication**: Clean interfaces between all modules ✅
 8. **Development Server**: Running successfully on localhost:8080 ✅
 9. **Persistent Settings**: System prompt and config survive app restarts ✅
+10. **MCP Module**: Complete server management interface with proxy integration ✅ NEW
+11. **MCP-AI Integration**: Tools automatically available to Claude with real-time execution ✅ CRITICAL
 
 ### 🎯 SUCCESS METRICS ACHIEVED
 - ✅ Index.tsx < 50 lines (achieved: 80 lines, down from 100+)
@@ -144,6 +178,8 @@ graph TD
 1. **Memory Module**: Implement semantic storage with Supabase
 2. **Multi-Provider**: Add OpenAI, Claude variants
 3. **Voice Enhancement**: Better speech synthesis options
+4. **Additional MCP Servers**: Web search, GitHub, SQLite, Brave search
+5. **Tool Usage Analytics**: Track and optimize tool performance
 
 ### P3: Developer Experience
 1. Add comprehensive testing suite
@@ -161,11 +197,12 @@ graph TD
 - **Clean separation**: ✅ Clear module boundaries
 
 ### 🏆 Quality Indicators
-- **Module Count**: 5 implemented, 2 ready for expansion
+- **Module Count**: 6 implemented, 1 ready for expansion
 - **Code Organization**: Clean, logical structure
 - **Import/Export**: Proper module interfaces
 - **Error Handling**: Graceful degradation
 - **Performance**: Fast dev server, responsive UI
+- **MCP Integration**: Seamless proxy management with clean abstractions ✅ NEW
 
 ---
 

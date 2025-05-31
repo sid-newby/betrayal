@@ -1,3 +1,4 @@
+```mermaid
 graph TD
     %% Current Architecture
     subgraph "Current State"

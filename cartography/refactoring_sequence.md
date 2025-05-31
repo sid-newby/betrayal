@@ -1,160 +1,151 @@
 # Safe Refactoring Sequence
 
-## Phase 1: Provider Interface Layer
-**Risk Level**: Medium
-**Rollback Strategy**: Feature flags + parallel implementations
+## Phase 1: Configuration Centralization
 
-### 1.1 AI Provider Interface
-1. Create provider interface types
-2. Implement Anthropic adapter
-3. Update useAnthropicChat to use adapter
-4. Verify chat functionality
+### 1.1 Create Configuration Service
+```typescript
+// Target: src/modules/config/service.ts
+export class ConfigService {
+  private static instance: ConfigService;
+  private config: Record<string, any> = {};
+  
+  static getInstance(): ConfigService;
+  getConfig<T>(key: string): T;
+  setConfig<T>(key: string, value: T): void;
+}
+```
 
-### 1.2 Speech Provider Interface
-1. Create speech interface types
-2. Implement browser speech adapter
-3. Update speech services
-4. Test voice interactions
+**Rollback**: Git revert, configuration values remain in original locations
 
-## Phase 2: Component Decomposition
-**Risk Level**: Medium-High
-**Rollback Strategy**: Gradual migration with feature toggles
+### 1.2 Environment Variable Migration
+1. Create type definitions
+2. Add validation layer
+3. Migrate from direct access
+4. Add error boundaries
 
-### 2.1 Chat Interface Splitting
-1. Extract chat state management
-2. Create subcomponents for message handling
-3. Implement proper component composition
-4. Verify chat functionality
+**Rollback**: Keep original env access until full migration verified
 
-### 2.2 Input Component Refactoring
-1. Extract provider-specific logic
-2. Create generic input handler
-3. Implement proper state management
-4. Test input behavior
+## Phase 2: Service Layer Extraction
 
-## Phase 3: State Management
-**Risk Level**: High
-**Rollback Strategy**: State synchronization between old/new
+### 2.1 Speech Synthesis Service
+1. Create service class
+2. Add dependency injection
+3. Extract stream handling
+4. Implement error handling
 
-### 3.1 Central Store Setup
-1. Create store structure
-2. Define state slices
-3. Implement actions/reducers
-4. Add state selectors
+**Rollback**: Toggle between old/new implementation with feature flag
 
-### 3.2 Component Migration
-1. Move chat state to store
-2. Update component subscriptions
-3. Remove local state
-4. Verify state consistency
+### 2.2 Provider Factory
+1. Create provider interface
+2. Extract common patterns
+3. Implement factory
+4. Add provider registry
 
-## Phase 4: Entry Point Surgery
-**Risk Level**: Medium
-**Rollback Strategy**: Backup entry points
+**Rollback**: Keep original provider implementation as fallback
 
-### 4.1 App.tsx Cleanup
-1. Extract theme provider
-2. Move routing configuration
-3. Create layout components
-4. Update main entry point
+## Phase 3: State Management Cleanup
 
-### 4.2 Initialization Flow
-1. Organize provider order
-2. Implement proper error boundaries
-3. Add loading states
-4. Test initialization sequence
+### 3.1 Chat State Extraction
+1. Create message store
+2. Extract state logic
+3. Add event system
+4. Implement observers
 
-## Phase 5: Service Layer
-**Risk Level**: Medium
-**Rollback Strategy**: Service versioning
+**Rollback**: State hydration from original implementation
 
-### 5.1 Speech Service Refactoring
-1. Create service interfaces
-2. Implement browser adapters
-3. Add error handling
-4. Test voice features
+### 3.2 Loading State Management
+1. Create loading service
+2. Extract state handling
+3. Add progress tracking
+4. Implement cancellation
 
-### 5.2 API Integration
-1. Create API client layer
-2. Implement request handling
-3. Add response processing
-4. Verify API interactions
+**Rollback**: Fallback to simple boolean state
 
-## Phase 6: UI Component Cleanup
-**Risk Level**: Low
-**Rollback Strategy**: Component versioning
+## Phase 4: Interface Refinement
 
-### 6.1 Settings Management
-1. Split settings domains
-2. Create focused components
-3. Implement proper validation
-4. Test settings flow
+### 4.1 Provider Interface
+1. Define base interfaces
+2. Extract shared types
+3. Add validation
+4. Implement adapters
 
-### 6.2 Toast System
-1. Centralize notifications
-2. Create toast manager
-3. Update error handling
-4. Verify notifications
+**Rollback**: Interface adapters preserve original contracts
 
-## Phase 7: Type System Hardening
-**Risk Level**: Low
-**Rollback Strategy**: Gradual strictness increase
+### 4.2 Stream Handling
+1. Create stream utilities
+2. Extract handlers
+3. Add backpressure
+4. Implement retry logic
 
-### 7.1 Type Definitions
-1. Strengthen interfaces
-2. Remove any types
-3. Add proper generics
-4. Verify type coverage
+**Rollback**: Fallback to direct stream handling
 
-### 7.2 Type Usage
-1. Update component props
-2. Fix type assertions
-3. Add type guards
-4. Test type safety
+## Validation Steps
+
+### For Each Change
+1. Run type checks
+2. Verify tests pass
+3. Check error handling
+4. Validate performance
+5. Review dependencies
+
+### Integration Points
+1. Configuration service adoption
+2. Provider interface implementation
+3. State management migration
+4. Stream handling updates
 
 ## Success Criteria
 
-### Each Phase
-- No regression in functionality
-- All tests passing
-- No new TypeScript errors
-- Performance metrics maintained
+### Technical Metrics
+- Type coverage: 100%
+- Test coverage: > 80%
+- Max file size: < 100 lines
+- Max complexity: < 6
 
-### Final State
-- Clear component boundaries
-- Provider-agnostic interfaces
-- Centralized state management
-- Strong type safety
-- Documented architecture
+### Business Metrics
+- Zero regression bugs
+- Maintained performance
+- Clean error handling
+- Type-safe interfaces
 
-## Emergency Procedures
+## Risk Mitigation
 
-### Critical Failure
-1. Activate fallback system
-2. Restore from last known good
-3. Roll back problematic changes
-4. Analyze failure points
-5. Adjust strategy
+### High-Risk Changes
+1. Provider interface updates
+2. Stream handling changes
+3. State management
 
-### Performance Issues
-1. Identify bottlenecks
-2. Implement quick fixes
-3. Plan optimization
-4. Monitor metrics
-5. Document findings
+### Mitigation Strategies
+1. Feature flags
+2. Parallel implementations
+3. Gradual rollout
+4. Comprehensive monitoring
 
 ## Verification Steps
 
-### For Each Component
-1. Unit tests passing
-2. Integration tests green
-3. Type checks clean
-4. Performance acceptable
-5. Documentation updated
-
 ### For Each Phase
-1. Feature flags working
-2. Rollback tested
-3. Monitoring in place
-4. Support tools ready
-5. Team briefed
+1. Run static analysis
+2. Execute test suite
+3. Verify types
+4. Check performance
+5. Review error handling
+
+### Final Validation
+1. End-to-end testing
+2. Performance benchmarks
+3. Error scenario testing
+4. Integration verification
+
+## Rollback Procedures
+
+### Quick Rollback
+1. Revert configuration
+2. Restore providers
+3. Reset state management
+4. Return to original streams
+
+### Gradual Rollback
+1. Feature flag disable
+2. State migration
+3. Interface adaptation
+4. Service restoration

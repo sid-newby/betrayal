@@ -1,159 +1,110 @@
 # Code Smell Report
 
-## High Severity (8-10)
+## Critical Findings
 
-### God Components
-1. **ChatInterface**
-- **Severity**: 9/10
-- **Location**: Multiple components tightly coupled
-- **Issues**:
-  - Manages too many responsibilities
-  - Direct provider dependencies
-  - State management scattered
-- **Fix Pattern**: Extract into smaller, focused components
+### 1. Voice Integration Coupling
+- **Location**: [`modules/voice/services/speechSynthesis.ts`](humanityzero/src/modules/voice/services/speechSynthesis.ts:34-88)
+- **Severity**: 7/10
+- **Issue**: Global client initialization and state management
+- **Fix Pattern**: Extract into proper service class with dependency injection
 
-2. **App.tsx**
-- **Severity**: 8/10
-- **Location**: [`App.tsx`](humanityzero/src/App.tsx)
-- **Issues**:
-  - Multiple initialization responsibilities
-  - Theme and routing mixed
-  - Layout concerns not separated
-- **Fix Pattern**: Extract providers and layout components
+### 2. Environment Variable Management
+- **Location**: Multiple files
+- **Severity**: 6/10
+- **Issue**: Scattered environment variable access
+- **Fix Pattern**: Centralize configuration management. The root .env file should maintain all environment variables and authorization keys.
+
+### 3. Error Handling Patterns
+- **Location**: Multiple files
+- **Severity**: 5/10
+- **Issue**: Inconsistent error handling strategies
+- **Fix Pattern**: Standardize error handling approach
+
+## Code Smells by Category
 
 ### Inappropriate Intimacy
-1. **ChatInput ↔ useAnthropicChat**
-- **Severity**: 9/10
-- **Location**: [`ChatInput.tsx`](humanityzero/src/components/ChatInput.tsx)
-- **Issues**:
-  - Direct knowledge of Anthropic implementation
-  - Tightly coupled to provider details
-- **Fix Pattern**: Introduce provider interface
-
-2. **Speech Services Coupling**
-- **Severity**: 8/10
-- **Location**: [`speech-recognition.ts`](humanityzero/src/services/speech-recognition.ts), [`speech-synthesis.ts`](humanityzero/src/services/speech-synthesis.ts)
-- **Issues**:
-  - Direct browser API coupling
-  - Shared implementation details
-- **Fix Pattern**: Create speech provider interface
-
-## Medium Severity (5-7)
-
-### Feature Envy
-1. **MicrophoneButton**
-- **Severity**: 7/10
-- **Location**: [`MicrophoneButton.tsx`](humanityzero/src/components/MicrophoneButton.tsx)
-- **Issues**:
-  - Too much knowledge of speech services
-  - Handles speech state management
-- **Fix Pattern**: Move speech logic to dedicated hook
-
-2. **SettingsDrawer**
-- **Severity**: 6/10
-- **Location**: [`SettingsDrawer.tsx`](humanityzero/src/components/SettingsDrawer.tsx)
-- **Issues**:
-  - Manages multiple settings domains
-  - Direct toast implementation knowledge
-- **Fix Pattern**: Split into domain-specific settings
+1. Chat-Voice Integration
+   - Chat module directly calls voice services
+   - Should use event system or proper service integration
 
 ### Divergent Change
-1. **ChatMessage**
-- **Severity**: 6/10
-- **Location**: [`ChatMessage.tsx`](humanityzero/src/components/ChatMessage.tsx)
-- **Issues**:
-  - Changes for both styling and content
-  - Mixed rendering responsibilities
-- **Fix Pattern**: Separate content and presentation
-
-2. **useAnthropicChat**
-- **Severity**: 7/10
-- **Location**: [`useAnthropicChat.ts`](humanityzero/src/hooks/useAnthropicChat.ts)
-- **Issues**:
-  - Changes for API updates and UI state
-  - Mixed error handling
-- **Fix Pattern**: Split into API and UI layers
-
-## Low Severity (1-4)
+1. Speech Synthesis Service
+   - Changes for: API updates, format changes, error handling
+   - Split into smaller, focused services
 
 ### Shotgun Surgery
-1. **Theme Changes**
-- **Severity**: 4/10
-- **Location**: Multiple style files
-- **Issues**:
-  - Theme changes require multiple file updates
-  - No centralized theme management
-- **Fix Pattern**: Create theme provider
+1. Configuration Changes
+   - Affects multiple files when API keys change
+   - Centralize configuration management
 
-2. **Toast Notifications**
-- **Severity**: 3/10
-- **Location**: Multiple components
-- **Issues**:
-  - Scattered toast implementations
-  - Inconsistent error handling
-- **Fix Pattern**: Centralize toast management
+## Architectural Violations
 
-### Data Clumps
-1. **Speech Options**
-- **Severity**: 3/10
-- **Location**: Speech service files
-- **Issues**:
-  - Repeated configuration objects
-  - Duplicated option types
-- **Fix Pattern**: Create shared configuration types
+### Global State
+1. Cartesia Client Instance
+   - Global singleton in speech synthesis
+   - Convert to proper service instance
 
-## Refactoring Priorities
+### Error Handling
+1. Inconsistent Patterns
+   - Mix of console.warn and thrown errors
+   - Standardize error handling strategy
+   - Use proper error boundaries
+   - Document Pattern and enforce anomaly remediation
 
-### P0 (Immediate)
-1. Extract provider interfaces
-2. Break ChatInterface into smaller components
-3. Implement proper state management
+### Configuration Management
+1. Scattered Environment Access
+   - Direct import.meta.env usage across files
+   - Create centralized config pattern documentation
+   - .env should be the single source of truth for environment variables
 
-### P1 (High Priority)
-1. Separate App.tsx concerns
-2. Create speech service abstraction
-3. Centralize error handling
+## Quick Wins
 
-### P2 (Medium Priority)
-1. Split settings by domain
-2. Extract theme management
-3. Standardize toast notifications
+1. Extract speech synthesis client initialization
+2. Standardize error handling
+3. Centralize environment variable access
+4. Add proper service interfaces
+5. Implement event-based integration
 
-### P3 (Low Priority)
-1. Consolidate configuration types
-2. Improve component composition
-3. Enhance error boundaries
+## Risk Assessment
 
-## Impact Analysis
+### High Risk
+- Speech synthesis service refactoring (affects real-time features)
+- Speech should be utilizing websockets for real-time updates
+- Error handling standardization (cross-cutting concern)
 
-### High Impact Areas
-- Chat functionality
-- Speech recognition
-- Provider integration
-- User settings
+### Medium Risk
+- Configuration centralization
+- Service interface extraction
 
-### Low Impact Areas
-- Theme configuration
-- Toast notifications
-- Error boundaries
-- Type definitions
+### Low Risk
+- Documentation improvements
+- Code organization changes
 
-## Success Metrics
+## Metrics
 
-### Code Quality
-- Max component size: 200 lines
-- Max file responsibilities: 3
-- Test coverage: > 80%
-- TypeScript strictness: 100%
+### Current State
+- Files with smells: 4
+- Critical issues: 3
+- Medium issues: 5
+- Low issues: 3
 
-### Maintainability
-- Clear component boundaries
-- Standardized error handling
-- Centralized state management
-- Provider-agnostic interfaces
+### Target State
+- Maximum coupling score: 3
+- Maximum file responsibilities: 1
+- Standardized patterns: 100%
 
-### Performance
-- Reduced bundle size
-- Faster component updates
-- Efficient error recovery
-- Optimized re-renders
+## Action Items
+
+1. Create configuration service
+2. Refactor speech synthesis as proper service
+3. Implement standardized error handling
+4. Extract service interfaces
+5. Add integration events system
+
+## Implementation Priority
+
+1. P0: Configuration centralization
+2. P1: Speech synthesis service refactoring
+3. P2: Error handling standardization
+4. P3: Interface extraction
+5. P4: Event system implementation

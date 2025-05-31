@@ -5,6 +5,53 @@
 An agentic chat application with voice interaction, semantic memory, and thinking capabilities.
 
 ## Features
+### BETRAYER Chat Interface
+
+A modern AI chat interface with SOTA models, tools, thinking, memory, web search and  advanced voice input capabilities.
+
+## Features
+
+### 🎤 **Advanced Voice Input**
+- **Toggle Recording**: Click microphone to start/stop continuous voice recording
+- **Real-time Transcription**: Speech converts to text and appears in input field for editing
+- **Continuous Mode**: Stay in recording mode to build up messages phrase by phrase
+- **Smart Appending**: Multiple spoken phrases automatically append with proper spacing
+- **Edit Before Send**: Review, modify, and enhance transcribed text before submission
+
+### 💬 **Chat Features**
+- Real-time conversation with AI models
+- Markdown rendering for rich text responses
+- Message history and context preservation
+- Loading states and smooth animations
+
+### ⚙️ **Configuration**
+- Multiple AI model selection (Sonnet 4, Opus 4)
+- Thinking mode toggle for detailed reasoning
+- Persistent settings storage
+
+## How to Use Voice Input
+
+1. **Start Recording**: Click the microphone button (turns red and pulsing)
+2. **Speak Naturally**: Say your message in phrases or sentences
+3. **Continue Speaking**: Each completed phrase appears in the text box
+4. **Stop Recording**: Click the microphone again to finish
+5. **Edit & Send**: Modify the transcribed text as needed, then send
+
+## Tech Stack
+
+- **Vite** - Build tool and dev server
+- **TypeScript** - Type safety and developer experience
+- **React** - UI framework with hooks and modern patterns
+- **shadcn-ui** - High-quality component library
+- **Tailwind CSS** - Utility-first styling
+- **Web Speech API** - Browser-native speech recognition
+
+## Architecture
+
+- **Modular Design**: Features organized in self-contained modules
+- **TypeScript Strict**: Full type safety throughout
+- **Direct Ref Communication**: Efficient state management for voice input
+- **Error Handling**: Graceful fallbacks for unsupported browsers
 
 ### Core Functionality
 - **Chat Interface**: Clean, responsive messaging with real-time responses
@@ -12,7 +59,11 @@ An agentic chat application with voice interaction, semantic memory, and thinkin
 - **AI Models**: Anthropic Claude Sonnet 4 and Opus 4 with thinking modes
 - **Web Search**: Native internet access through Anthropic's canonical web search tools
 - **Semantic Memory**: Automatic context storage and retrieval using vector embeddings
-- **MCP Integration**: Model Context Protocol support for extensible tool connectivity
+- **🔧 MCP Integration**: Model Context Protocol support for real-time tool execution
+  - **Filesystem Access**: Read, write, search, and manage project files
+  - **Extensible Tools**: Add any MCP server for new capabilities
+  - **Real-time Execution**: Tools execute instantly during conversations
+  - **Automatic Integration**: Tools appear in Claude's capabilities automatically
 
 ### User Interface
 - **Dark Theme**: Black background, white text, #00b6dd accent
@@ -109,6 +160,44 @@ For technical details, architecture decisions, and development guidelines, see:
 - **Real-time Results**: Up-to-date information with source citations
 - **Location Aware**: Search results localized to Chicago timezone
 - **Rate Limited**: Maximum 5 searches per conversation for optimal performance
+
+### 🔧 MCP (Model Context Protocol) Integration
+
+> **What is MCP?** MCP extends Claude's capabilities with real-time tools. Instead of just text, Claude can read files, execute commands, access databases, and more.
+
+#### Quick Setup (Filesystem Tools)
+1. **Open Settings** → Click gear icon → MCP tab
+2. **Load Preset** → Click "Load Preset"
+3. **Register** → Click "Register Server"
+4. **Start Proxy** → Click "Start Proxy"
+5. **Test** → Ask Claude: "Read the package.json file"
+
+#### What Claude Can Do With MCP
+- **File Operations**: "Read the README", "Create a new component", "Search for TypeScript files"
+- **Project Analysis**: "Show me the project structure", "Find all TODO comments"
+- **Code Management**: "Move this file", "Create a backup", "List all dependencies"
+- **Real-time Execution**: Tools run immediately, results fed back to Claude
+
+#### Available Tools (When Configured)
+- `read_file` - Read any project file
+- `write_file` - Create or modify files
+- `list_directory` - Show directory contents
+- `search_files` - Find files by pattern
+- `create_directory` - Make new folders
+- `move_file` - Rename/move files
+- `get_file_info` - File metadata
+
+#### Security
+- **Sandboxed**: MCP servers only access directories you specify
+- **Explicit Permission**: Each server requires manual registration
+- **Transparent**: All tool usage visible in conversation
+
+#### Adding More Servers
+See **[MCP Servers Documentation](humanityzero/mcp-servers/README.md)** for:
+- Complete setup guide
+- Adding new MCP servers (GitHub, SQLite, web search, etc.)
+- Troubleshooting common issues
+- Step-by-step processes
 
 ## Development
 

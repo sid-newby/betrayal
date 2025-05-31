@@ -1,110 +1,127 @@
 {
-  "critical_implementations": [
+  "critical": [
     {
-      "id": "PSEUDO-001",
-      "location": "src/hooks/useAnthropicChat.ts:37-41",
-      "type": "placeholder_config",
+      "location": "modules/voice/services/speechSynthesis.ts:63-66",
+      "type": "TODO comment",
+      "content": "Make modelId and voice.id configurable",
       "toxicity": "critical",
-      "description": "Default system prompt and maxTokens using hardcoded values instead of proper configuration",
-      "dependencies": [
-        "AnthropicConfig type definition",
-        "Environment configuration"
-      ],
-      "fix_priority": "P0",
-      "fix_complexity": "medium",
-      "fix_steps": [
-        "Add proper type definitions for systemPrompt and maxTokens in AnthropicConfig",
-        "Implement environment-based configuration",
-        "Add validation for required config values"
+      "reason": "Hardcoded values in production code",
+      "action": "Extract to configuration service",
+      "dependencies": ["Environment variables", "Settings module"],
+      "complexity": "Medium",
+      "prerequisites": [
+        "Configuration service implementation",
+        "Settings validation layer"
       ]
-    },
+    }
+  ],
+  "high": [
     {
-      "id": "PSEUDO-002",
-      "location": "src/hooks/useAnthropicChat.ts:57-59",
-      "type": "commented_feature",
+      "location": "modules/voice/services/speechSynthesis.ts:84-86",
+      "type": "Comment block",
+      "content": "SDK closure handling comment",
       "toxicity": "high",
-      "description": "Tools and betas implementation deferred to 'Phase 2' with no actual implementation",
-      "dependencies": [
-        "Anthropic API configuration",
-        "Tool definitions",
-        "Beta feature flags"
-      ],
-      "fix_priority": "P1",
-      "fix_complexity": "high",
-      "fix_steps": [
-        "Define tool interfaces based on README examples",
-        "Implement tool handlers",
-        "Add beta feature configuration"
+      "reason": "Unclear implementation responsibility",
+      "action": "Implement proper cleanup",
+      "dependencies": ["Cartesia SDK"],
+      "complexity": "High",
+      "prerequisites": [
+        "Resource cleanup pattern",
+        "Error boundary implementation"
       ]
-    },
+    }
+  ],
+  "medium": [
     {
-      "id": "PSEUDO-003",
-      "location": "src/hooks/useAnthropicChat.ts:68-71",
-      "type": "stub_implementation",
-      "toxicity": "critical",
-      "description": "Tool use handling returns placeholder message instead of actual implementation",
-      "dependencies": [
-        "Tool response handling",
-        "UI message display"
-      ],
-      "fix_priority": "P0",
-      "fix_complexity": "high",
-      "fix_steps": [
-        "Implement tool execution logic",
-        "Add proper error handling",
-        "Create tool response formatter"
-      ]
-    },
-    {
-      "id": "PSEUDO-004",
-      "location": "src/hooks/useAnthropicChat.ts:81-83",
-      "type": "commented_feature",
+      "location": "modules/ai-provider/adapters/AnthropicProvider.ts:89-91",
+      "type": "Fallback message",
+      "content": "Generic error message",
       "toxicity": "medium",
-      "description": "Usage data tracking commented out without implementation",
-      "dependencies": [
-        "Usage tracking system",
-        "Metrics collection"
-      ],
-      "fix_priority": "P2",
-      "fix_complexity": "medium",
-      "fix_steps": [
-        "Define usage tracking interface",
-        "Implement metrics collection",
-        "Add usage data storage"
+      "reason": "Non-specific error handling",
+      "action": "Implement proper error types",
+      "dependencies": ["Error handling system"],
+      "complexity": "Medium",
+      "prerequisites": [
+        "Error type definitions",
+        "Error handling strategy"
       ]
     }
   ],
-  "verification_required": [
+  "safe_delete": [
     {
-      "id": "VERIFY-001",
-      "location": "src/hooks/useAnthropicChat.ts:9",
-      "type": "api_key_handling",
-      "description": "Anthropic client instantiation assumes environment variable without verification",
-      "verification_steps": [
-        "Check if ANTHROPIC_API_KEY is properly set",
-        "Verify API key format",
-        "Add error handling for missing key"
+      "location": "modules/voice/services/speechSynthesis.ts:22-27",
+      "type": "Comment block",
+      "content": "WebPlayer format comment",
+      "toxicity": "low",
+      "reason": "Redundant with type definitions",
+      "action": "Delete comment, rely on types",
+      "dependencies": [],
+      "complexity": "Low",
+      "prerequisites": []
+    }
+  ],
+  "verify_first": [
+    {
+      "location": "modules/ai-provider/adapters/AnthropicProvider.ts:39",
+      "type": "Default value",
+      "content": "Default system prompt",
+      "toxicity": "medium",
+      "reason": "Hardcoded default",
+      "action": "Move to configuration",
+      "dependencies": ["Settings module"],
+      "complexity": "Medium",
+      "prerequisites": [
+        "Usage analysis",
+        "Settings schema update"
       ]
+    }
+  ],
+  "action_items": [
+    {
+      "priority": "P0",
+      "description": "Extract model configuration",
+      "file": "modules/voice/services/speechSynthesis.ts",
+      "changes": [
+        "Create config interface",
+        "Add validation",
+        "Move to settings"
+      ],
+      "prerequisites": ["Configuration service"]
     },
     {
-      "id": "VERIFY-002",
-      "location": "src/hooks/useAnthropicChat.ts:88-90",
-      "type": "external_service",
-      "description": "Speech synthesis called without checking browser support or user preferences",
-      "verification_steps": [
-        "Check browser compatibility",
-        "Verify user preferences",
-        "Add fallback handling"
-      ]
+      "priority": "P1",
+      "description": "Implement proper cleanup",
+      "file": "modules/voice/services/speechSynthesis.ts",
+      "changes": [
+        "Add cleanup handler",
+        "Implement error boundary",
+        "Add logging"
+      ],
+      "prerequisites": ["Error handling system"]
+    },
+    {
+      "priority": "P2",
+      "description": "Error handling system",
+      "file": "modules/ai-provider/adapters/AnthropicProvider.ts",
+      "changes": [
+        "Create error types",
+        "Add error factory",
+        "Implement handlers"
+      ],
+      "prerequisites": ["Type system update"]
     }
   ],
-  "safe_to_delete": [],
-  "metadata": {
-    "total_issues": 6,
-    "critical_count": 2,
-    "high_priority_count": 1,
-    "medium_priority_count": 2,
-    "low_priority_count": 1,
-    "last_updated": "2025-05-30T21:55:49-05:00"
+  "metrics": {
+    "total_instances": 5,
+    "by_severity": {
+      "critical": 1,
+      "high": 1,
+      "medium": 2,
+      "low": 1
+    },
+    "affected_modules": [
+      "voice",
+      "ai-provider"
+    ]
   }
 }

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useImperativeHandle, forwardRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Send } from "lucide-react";
@@ -8,8 +8,21 @@ interface ChatInputProps {
   isLoading: boolean;
 }
 
-export const ChatInput = ({ onSendMessage, isLoading }: ChatInputProps) => {
+export interface ChatInputRef {
+  appendText: (text: string) => void;
+}
+
+export const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({ onSendMessage, isLoading }, ref) => {
   const [input, setInput] = useState('');
+
+  useImperativeHandle(ref, () => ({
+    appendText: (text: string) => {
+      setInput(prev => {
+        const newText = prev.trim() ? `${prev} ${text}` : text;
+        return newText;
+      });
+    }
+  }));
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,6 +38,8 @@ export const ChatInput = ({ onSendMessage, isLoading }: ChatInputProps) => {
       handleSubmit(e);
     }
   };
+
+
 
   return (
     <form onSubmit={handleSubmit} className="flex gap-2 flex-1">
@@ -46,4 +61,6 @@ export const ChatInput = ({ onSendMessage, isLoading }: ChatInputProps) => {
       </Button>
     </form>
   );
-};
+});
+
+ChatInput.displayName = 'ChatInput';

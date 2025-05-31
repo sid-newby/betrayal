@@ -1,6 +1,26 @@
 export interface AIMessage {
-  role: 'user' | 'assistant';
+  role: 'user' | 'assistant' | 'tool';
   content: string;
+  toolCalls?: AIToolCall[];
+  toolResults?: AIToolResult[];
+}
+
+export interface AITool {
+  name: string;
+  description: string;
+  input_schema: any;
+}
+
+export interface AIToolCall {
+  id: string;
+  name: string;
+  input: any;
+}
+
+export interface AIToolResult {
+  tool_use_id: string;
+  content: string;
+  is_error?: boolean;
 }
 
 export interface AIConfig {
@@ -11,6 +31,7 @@ export interface AIConfig {
   maxTokens?: number;
   temperature?: number;
   maxSpokenChars?: number;
+  tools?: AITool[];
 }
 
 export interface AIResponse {
@@ -21,6 +42,7 @@ export interface AIResponse {
     inputTokens: number;
     outputTokens: number;
   };
+  toolCalls?: AIToolCall[];
 }
 
 export interface AIProvider {

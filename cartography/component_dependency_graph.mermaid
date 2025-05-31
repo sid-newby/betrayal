@@ -1,60 +1,68 @@
 graph TD
-    %% Main Application Flow
-    A[App.tsx] -->|routes to| B[Index.tsx]
-    B -->|renders| C[ChatInterface]
+    %% Core Application Flow
+    App[App.tsx] -->|routes to| Index[Index Page]
+    Index -->|uses| Chat[Chat Module]
+    Index -->|uses| Voice[Voice Module]
+    Index -->|uses| Settings[Settings Module]
 
-    %% Chat Components
-    C -->|uses| D[ChatInput]
-    C -->|uses| E[ChatMessage]
-    C -->|uses| F[MicrophoneButton]
-    C -->|uses| G[SettingsDrawer]
+    %% Chat Module Structure
+    Chat -->|contains| CI[ChatInput]
+    Chat -->|contains| CM[ChatMessage]
+    Chat -->|uses| CS[Chat State]
+    Chat -->|uses| CAI[AI Provider]
+    
+    %% Voice Module Structure
+    Voice -->|contains| MB[MicrophoneButton]
+    Voice -->|uses| SS[Speech Synthesis]
+    Voice -->|uses| SR[Speech Recognition]
+    Voice -->|uses| TP[Text Processing]
 
-    %% Service Integration
-    D -->|hooks| H[useAnthropicChat]
-    F -->|uses| I[speech-recognition]
-    C -->|uses| J[speech-synthesis]
+    %% Settings Module Structure
+    Settings -->|contains| SD[SettingsDrawer]
+    Settings -->|uses| Storage[Local Storage]
+    Settings -->|configures| CAI
+    Settings -->|configures| Voice
 
-    %% State and Utils
-    H -->|types| K[anthropic.types]
-    D -->|uses| L[use-mobile]
-    G -->|uses| M[use-toast]
+    %% AI Provider Implementation
+    CAI -->|implements| AP[Anthropic Provider]
+    AP -->|uses| WS[WebSocket Stream]
+    AP -->|uses| Config[Environment Config]
+
+    %% State Management
+    CS -->|updates| Messages[Message Store]
+    CS -->|triggers| Loading[Loading State]
 
     %% UI Components
-    D -->|uses| N[ui/input]
-    D -->|uses| O[ui/button]
-    E -->|uses| P[ui/avatar]
-    G -->|uses| Q[ui/drawer]
+    CI -->|triggers| Send[Send Message]
+    MB -->|triggers| Record[Voice Recording]
+    SD -->|updates| Config
+
+    %% Cross-cutting Concerns
+    Config -->|affects| AP
+    Config -->|affects| SS
+    Messages -->|renders| CM
+
+    %% Component Styling
+    style App fill:#f9f,stroke:#333,stroke-width:2px
+    style Index fill:#bbf,stroke:#333,stroke-width:2px
+    style Chat fill:#dfd,stroke:#333,stroke-width:2px
+    style Voice fill:#fdd,stroke:#333,stroke-width:2px
+    style Settings fill:#ddf,stroke:#333,stroke-width:2px
     
-    %% Service Dependencies
-    I -->|implements| R[speech.d.ts]
-    J -->|implements| R
-    H -->|external| S[Anthropic API]
+    %% Coupling Indicators
+    linkStyle 3 stroke:#f00,stroke-width:2px
+    linkStyle 12 stroke:#f00,stroke-width:2px
+    linkStyle 13 stroke:#f00,stroke-width:2px
 
-    %% Utility Dependencies
-    T[utils.ts] -->|used by| D
-    T -->|used by| E
-    T -->|used by| C
+    %% Legend
+    subgraph Legend
+        L1[Core Module]
+        L2[Component]
+        L3[Service]
+        L4[High Coupling]
+    end
 
-    %% State Management Concerns
-    U[Local State] -.->|scattered in| C
-    U -.->|scattered in| D
-    U -.->|scattered in| G
-
-    %% Potential Circular Dependencies
-    C -.->|potential circular| D
-    D -.->|potential circular| H
-    H -.->|potential circular| C
-
-    %% Missing Abstractions
-    V[Missing Provider<br/>Interface] -.->|needed| H
-    W[Missing Speech<br/>Interface] -.->|needed| I
-    W -.->|needed| J
-
-    %% Style Coupling
-    X[App.css] -->|styles| A
-    Y[index.css] -->|global styles| Z[main.tsx]
-
-    %% Suboptimal Patterns
-    style V fill:#ff9999
-    style W fill:#ff9999
-    style U fill:#ffcc99
+    style L1 fill:#bbf,stroke:#333,stroke-width:2px
+    style L2 fill:#dfd,stroke:#333,stroke-width:2px
+    style L3 fill:#fdd,stroke:#333,stroke-width:2px
+    linkStyle 24 stroke:#f00,stroke-width:2px

@@ -1,0 +1,15 @@
+{
+  "filesystem": {
+    "name": "File System Access",
+    "allowedDirectories": [
+      "/Users/sidnewby/Prog/automaker",
+      "/Users/sidnewby/Desktop"
+    ],
+    "description": "Provides read/write access to specified project directories",
+    "security": {
+      "readOnly": false,
+      "allowSymlinks": true,
+      "maxFileSize": "10MB"
+    }
+  }
+}

@@ -1,216 +1,175 @@
 # Implementation Roadmap
 
-## Phase 1: Foundation (Size: M)
-**Goals**: Establish provider interfaces and basic architecture
+## Phase 1: Foundation (Size: S)
 
-### Deliverables
-- Provider interface definitions
-- Initial adapter implementations
-- Basic test infrastructure
-- Architecture documentation
-
-### Success Metrics
-- Interface coverage: 100%
-- Type safety: 100%
-- Test coverage: > 80%
-- Zero any types
+### Goals
+- Establish configuration service
+- Centralize environment handling
+- Create validation layer
 
 ### Prerequisites
-- Architecture approval
-- Test environment setup
-- Team alignment
-
-### Team Roles
-- Lead: Architecture design
-- Frontend: Interface implementation
-- QA: Test framework setup
-
-## Phase 2: Core Refactoring (Size: L)
-**Goals**: Break down monolithic components
-
-### Deliverables
-- Modular chat components
-- State management implementation
-- Provider adapters
-- Integration tests
+- None
 
 ### Success Metrics
-- Component size < 200 lines
-- Coupling scores < 5
-- Performance within 5% of baseline
-- All tests passing
-
-### Prerequisites
-- Phase 1 completion
-- Performance baseline
-- Monitoring setup
+- Zero direct env access
+- Type-safe config access
+- 100% validation coverage
 
 ### Team Roles
-- Lead: Technical guidance
-- Frontend: Component refactoring
-- QA: Integration testing
+- Lead: Architecture
+- Support: Development
+- Review: QA
+
+## Phase 2: Service Layer (Size: M)
+
+### Goals
+- Extract speech synthesis
+- Create provider factory
+- Implement DI system
+
+### Prerequisites
+- Configuration service
+- Type definitions
+
+### Success Metrics
+- No global state
+- Clean service boundaries
+- Full error handling
+
+### Team Roles
+- Lead: Development
+- Support: Architecture
+- Review: DevOps
 
 ## Phase 3: State Management (Size: M)
-**Goals**: Implement centralized state handling
 
-### Deliverables
-- State store implementation
-- Migration from local state
-- State selectors
-- Performance optimizations
-
-### Success Metrics
-- Zero prop drilling
-- State updates < 50ms
-- Memory usage within limits
-- Clear state flows
+### Goals
+- Extract chat state
+- Create message store
+- Implement event system
 
 ### Prerequisites
-- Component modularization
-- Performance requirements
-- State design approval
-
-### Team Roles
-- Lead: State architecture
-- Frontend: Implementation
-- QA: Performance testing
-
-## Phase 4: Provider Integration (Size: L)
-**Goals**: Complete provider abstraction
-
-### Deliverables
-- Full provider implementations
-- Error handling
-- Fallback systems
-- Integration tests
+- Service layer
+- Error boundaries
 
 ### Success Metrics
-- Provider switch < 1min
-- Error recovery < 2s
-- 100% provider coverage
-- Zero direct coupling
-
-### Prerequisites
-- Interface stability
-- Provider accounts
-- API documentation
+- Decoupled state
+- Event-driven updates
+- Clean data flow
 
 ### Team Roles
-- Lead: Provider strategy
-- Frontend: Integration
-- QA: Provider testing
+- Lead: Development
+- Support: Architecture
+- Review: QA
 
-## Phase 5: UI Enhancement (Size: S)
-**Goals**: Improve user interface components
+## Phase 4: Interface Layer (Size: L)
 
-### Deliverables
-- Component library updates
-- Accessibility improvements
-- Performance optimizations
-- Style system
+### Goals
+- Define provider interfaces
+- Extract stream handling
+- Create adapters
+
+### Prerequisites
+- State management
+- Service layer
 
 ### Success Metrics
-- WCAG compliance
-- Load time < 2s
-- FPS > 55
-- Style consistency
-
-### Prerequisites
-- Design system
-- Performance targets
-- Accessibility requirements
+- Clean abstractions
+- Type-safe interfaces
+- Proper error handling
 
 ### Team Roles
-- Lead: Technical review
-- Frontend: Implementation
-- Design: UI/UX guidance
+- Lead: Architecture
+- Support: Development
+- Review: DevOps
 
-## Phase 6: Quality Assurance (Size: M)
-**Goals**: Ensure system reliability
+## Phase 5: Testing & Validation (Size: M)
 
-### Deliverables
-- Comprehensive tests
-- Performance benchmarks
-- Error tracking
-- Documentation
+### Goals
+- Add unit tests
+- Create integration tests
+- Implement benchmarks
+
+### Prerequisites
+- All interfaces defined
+- Error boundaries
 
 ### Success Metrics
-- Test coverage > 90%
-- Zero known bugs
-- Documentation complete
-- Performance targets met
-
-### Prerequisites
-- Feature completion
-- Test environment
-- Monitoring tools
+- 80%+ coverage
+- Performance baseline
+- Error scenarios
 
 ### Team Roles
-- Lead: Quality standards
-- QA: Test execution
-- Frontend: Bug fixes
+- Lead: QA
+- Support: Development
+- Review: Architecture
 
-## Phase 7: Production Readiness (Size: S)
-**Goals**: Prepare for production deployment
+## Checkpoints
 
-### Deliverables
-- Production builds
-- Deployment scripts
-- Monitoring setup
-- Rollback procedures
+### Technical
+- Type coverage: 100%
+- Test coverage: > 80%
+- Max file size: < 100 lines
+- Max complexity: < 6
 
-### Success Metrics
-- Build time < 5min
-- Zero deployment issues
-- Monitoring coverage
-- Recovery time < 5min
+### Business
+- Zero regression bugs
+- Maintained performance
+- Clean error handling
+- Type-safe interfaces
 
-### Prerequisites
-- QA approval
-- Infrastructure ready
-- Team training
+## Monitoring
 
-### Team Roles
-- Lead: Deployment strategy
-- DevOps: Infrastructure
-- QA: Verification
+### Performance
+- Response times
+- Memory usage
+- Error rates
+- API latency
 
-## Progress Tracking
-
-### Weekly Metrics
-- Code quality scores
+### Quality
 - Test coverage
-- Performance metrics
-- Bug count
+- Type coverage
+- Lint violations
+- Complexity scores
 
-### Monthly Review
-- Phase completion
-- Risk assessment
-- Resource allocation
-- Timeline adjustment
+## Rollback Procedures
 
-### Documentation
-- Architecture updates
+### Quick Rollback
+1. Feature flag disable
+2. Revert configuration
+3. Restore providers
+4. Reset state
+
+### Gradual Rollback
+1. State migration
+2. Interface adaptation
+3. Service restoration
+4. Config updates
+
+## Documentation
+
+### Required Updates
 - API documentation
-- Team guidelines
-- Lessons learned
+- Service interfaces
+- Error handling
+- Configuration guide
 
-## Risk Management
+### Validation Steps
+- Code review
+- Integration testing
+- Performance testing
+- Security review
 
-### Technical Risks
-- Provider API changes
-- Performance degradation
-- Integration issues
-- Data migration
+## Success Criteria
 
-### Mitigation Strategies
-- Feature flags
-- Rollback procedures
-- Performance monitoring
-- Regular backups
+### Technical
+- Clean dependency graph
+- Type-safe interfaces
+- Proper error handling
+- Performance metrics met
 
-### Contingency Plans
-- Emergency rollback
-- Provider fallback
-- Manual overrides
-- Support escalation
+### Business
+- No user impact
+- Feature parity
+- Improved stability
+- Better maintainability

@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { MarkdownChatMessage, ChatInput, useChatWithAI } from '@/modules/chat';
+import { MarkdownChatMessage, ChatInput, ChatInputRef, useChatWithAI } from '@/modules/chat';
 import { MicrophoneButton } from '@/modules/voice';
 import { SettingsDrawer, AppConfig, configStorage } from '@/modules/settings';
 
@@ -8,8 +8,9 @@ const Index = () => {
   // Load config from localStorage on mount
   const [config, setConfig] = useState<AppConfig>(() => configStorage.load());
 
-  const [isListening, setIsListening] = useState(false);
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const chatInputRef = useRef<ChatInputRef>(null);
   
   const { messages, isLoading, sendMessage } = useChatWithAI(config);
 
@@ -27,8 +28,8 @@ const Index = () => {
   }, [messages]);
 
   const handleTranscription = (text: string) => {
-    if (text.trim()) {
-      sendMessage(text);
+    if (text.trim() && chatInputRef.current) {
+      chatInputRef.current.appendText(text.trim());
     }
   };
 
@@ -45,7 +46,7 @@ const Index = () => {
       {/* Header */}
       <div className="flex justify-between items-center p-4 border-b border-white">
         <div className="flex items-center gap-3">
-          <h1 className="font-poppins font-black text-xl tracking-tighter">BETRAYER.</h1>
+          <h1 className="font-poppins font-black text-5xl tracking-tighter">BETRAYER.</h1>
           <div className="text-sm text-gray-400">
             {getModelDisplayName(config.model)}
             {config.thinking && ' • Thinking'}
@@ -81,12 +82,14 @@ const Index = () => {
 
         {/* Chat Input with Microphone */}
         <div className="flex gap-2 p-4 border-t border-white">
-          <ChatInput onSendMessage={sendMessage} isLoading={isLoading} />
+          <ChatInput 
+            ref={chatInputRef}
+            onSendMessage={sendMessage} 
+            isLoading={isLoading}
+          />
           <MicrophoneButton
             onTranscription={handleTranscription}
             onSpeech={handleSpeech}
-            isListening={isListening}
-            setIsListening={setIsListening}
           />
         </div>
       </div>

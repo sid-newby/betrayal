@@ -1,5 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk';
-import { AIProvider, AIMessage, AIConfig, AIResponse } from '../types';
+import { AIProvider, AIMessage, AIConfig, AIResponse, AITool, AIToolCall } from '../types';
 
 export class AnthropicProvider implements AIProvider {
   private client: Anthropic;
@@ -31,10 +31,44 @@ export class AnthropicProvider implements AIProvider {
     
     try {
       // Convert to Anthropic format
-      const anthropicMessages: Anthropic.Beta.Messages.MessageCreateParams['messages'] = messages.map(msg => ({
-        role: msg.role,
-        content: [{ type: 'text', text: msg.content }]
-      }));
+      const anthropicMessages: Anthropic.Beta.Messages.MessageCreateParams['messages'] = messages.map(msg => {
+        if (msg.role === 'tool') {
+          // Handle tool result messages
+          const toolResults = msg.toolResults || [];
+          return {
+            role: 'user' as const,
+            content: toolResults.map(result => ({
+              type: 'tool_result' as const,
+              tool_use_id: result.tool_use_id,
+              content: result.content,
+              is_error: result.is_error
+            }))
+          };
+        } else if (msg.toolCalls && msg.toolCalls.length > 0) {
+          // Handle assistant messages with tool calls
+          const content: any[] = [];
+          if (msg.content) {
+            content.push({ type: 'text', text: msg.content });
+          }
+          msg.toolCalls.forEach(toolCall => {
+            content.push({
+              type: 'tool_use',
+              id: toolCall.id,
+              name: toolCall.name,
+              input: toolCall.input
+            });
+          });
+          return {
+            role: msg.role as 'user' | 'assistant',
+            content
+          };
+        } else {
+          return {
+            role: msg.role as 'user' | 'assistant',
+            content: [{ type: 'text', text: msg.content }]
+          };
+        }
+      });
 
       const systemPrompt = config.systemPrompt || "You are a helpful AI assistant. Your responses should be concise and informative.";
       const maxTokens = config.maxTokens || 32000;
@@ -47,6 +81,15 @@ export class AnthropicProvider implements AIProvider {
         messages: anthropicMessages,
         stream: true,
       };
+
+      // Add tools if available
+      if (config.tools && config.tools.length > 0) {
+        apiParams.tools = config.tools.map(tool => ({
+          name: tool.name,
+          description: tool.description,
+          input_schema: tool.input_schema
+        }));
+      }
 
       if (config.thinking && config.thinkingBudget) {
         apiParams.thinking = {
@@ -61,6 +104,7 @@ export class AnthropicProvider implements AIProvider {
       let responseId = '';
       let stopReason: string | undefined;
       let usage: { inputTokens: number; outputTokens: number } | undefined;
+      let toolCalls: AIToolCall[] = [];
 
       for await (const chunk of stream) {
         if (chunk.type === 'message_start') {
@@ -74,6 +118,16 @@ export class AnthropicProvider implements AIProvider {
         } else if (chunk.type === 'content_block_delta') {
           if (chunk.delta.type === 'text_delta') {
             content += chunk.delta.text;
+          } else if (chunk.delta.type === 'input_json_delta') {
+            // Handle tool input streaming if needed
+          }
+        } else if (chunk.type === 'content_block_start') {
+          if (chunk.content_block.type === 'tool_use') {
+            toolCalls.push({
+              id: chunk.content_block.id,
+              name: chunk.content_block.name,
+              input: chunk.content_block.input
+            });
           }
         } else if (chunk.type === 'message_delta') {
           stopReason = chunk.delta.stop_reason || undefined;
@@ -95,6 +149,7 @@ export class AnthropicProvider implements AIProvider {
         content,
         stopReason,
         usage,
+        toolCalls: toolCalls.length > 0 ? toolCalls : undefined,
       };
     } catch (error) {
       console.error('Anthropic API error:', error);

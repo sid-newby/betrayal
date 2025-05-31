@@ -1,24 +1,21 @@
 import { useState, useRef, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
-import { Mic, MicOff } from "lucide-react";
+import { Mic, Square } from "lucide-react";
 
 interface MicrophoneButtonProps {
   onTranscription: (text: string) => void;
   onSpeech: (text: string) => void;
-  isListening: boolean;
-  setIsListening: (listening: boolean) => void;
 }
 
 export const MicrophoneButton = ({ 
   onTranscription, 
-  onSpeech, 
-  isListening, 
-  setIsListening 
+  onSpeech
 }: MicrophoneButtonProps) => {
   const [isRecording, setIsRecording] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const recognitionRef = useRef<any>(null);
   const synthRef = useRef<SpeechSynthesis | null>(null);
+  const shouldKeepRecording = useRef(false);
 
   useEffect(() => {
     if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
@@ -28,26 +25,46 @@ export const MicrophoneButton = ({
       recognitionRef.current.interimResults = true;
       recognitionRef.current.lang = 'en-US';
 
-      recognitionRef.current.onresult = (event: any) => {
-        const transcript = Array.from(event.results)
-          .map((result: any) => result[0])
-          .map((result: any) => result.transcript)
-          .join('');
+      recognitionRef.current.onstart = () => {
+        console.log('Speech recognition started');
+        setIsRecording(true);
+      };
 
-        if (event.results[event.results.length - 1].isFinal) {
-          onTranscription(transcript);
+      recognitionRef.current.onresult = (event: any) => {
+        // Only process final results to avoid duplication
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          if (event.results[i].isFinal) {
+            const transcript = event.results[i][0].transcript;
+            console.log('Final transcript:', transcript);
+            
+            // Immediately send the transcript
+            if (transcript.trim()) {
+              onTranscription(transcript.trim());
+            }
+          }
         }
       };
 
       recognitionRef.current.onerror = (event: any) => {
         console.error('Speech recognition error:', event.error);
         setIsRecording(false);
-        setIsListening(false);
       };
 
       recognitionRef.current.onend = () => {
-        setIsRecording(false);
-        setIsListening(false);
+        console.log('Speech recognition ended');
+        // If we should keep recording, restart it automatically
+        if (shouldKeepRecording.current) {
+          console.log('Restarting speech recognition...');
+          try {
+            recognitionRef.current.start();
+          } catch (error) {
+            console.error('Error restarting recognition:', error);
+            shouldKeepRecording.current = false;
+            setIsRecording(false);
+          }
+        } else {
+          setIsRecording(false);
+        }
       };
     }
 
@@ -61,26 +78,32 @@ export const MicrophoneButton = ({
         synthRef.current.cancel();
       }
     };
-  }, [onTranscription, setIsListening]);
+  }, [onTranscription]);
 
-  const toggleMicrophone = async () => {
+  const toggleMicrophone = () => {
     if (isRecording) {
       // Stop recording
+      console.log('Stopping recording...');
+      shouldKeepRecording.current = false;
       if (recognitionRef.current) {
         recognitionRef.current.stop();
       }
       setIsRecording(false);
-      setIsListening(false);
     } else {
       // Start recording
+      console.log('Starting recording...');
+      shouldKeepRecording.current = true;
       try {
         if (recognitionRef.current) {
           recognitionRef.current.start();
-          setIsRecording(true);
-          setIsListening(true);
+        } else {
+          alert('Speech recognition is not available in your browser');
         }
       } catch (error) {
         console.error('Error starting speech recognition:', error);
+        alert('Error: ' + error.message);
+        shouldKeepRecording.current = false;
+        setIsRecording(false);
       }
     }
   };
@@ -111,11 +134,14 @@ export const MicrophoneButton = ({
   return (
     <Button
       onClick={toggleMicrophone}
-      disabled={isListening}
-      className="bg-accent hover:bg-accent/90 border border-white squish-button"
+      className={`border border-white squish-button ${
+        isRecording 
+          ? 'bg-red-600 hover:bg-red-700 animate-pulse' 
+          : 'bg-accent hover:bg-accent/90'
+      }`}
     >
       {isRecording ? (
-        <MicOff className="h-4 w-4" />
+        <Square className="h-4 w-4" />
       ) : (
         <Mic className="h-4 w-4" />
       )}
