@@ -33,7 +33,7 @@ export const useChatWithAI = (config: AIConfig) => {
 
       // Trigger speech synthesis
       if (response.content) {
-        speakAssistantMessage(response.content);
+        speakAssistantMessage(response.content, config.maxSpokenChars);
       }
       
     } catch (error) {

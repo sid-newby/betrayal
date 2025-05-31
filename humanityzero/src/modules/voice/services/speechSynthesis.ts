@@ -1,4 +1,5 @@
 import { CartesiaClient, WebPlayer } from '@cartesia/cartesia-js';
+import { processTextForTTS } from '../utils/textProcessing';
 
 /**
  * Speech Synthesis Service using Cartesia TTS
@@ -30,13 +31,22 @@ const OUTPUT_FORMAT = {
  * @param text The text to be spoken.
  * @returns Promise<void> A promise that resolves when speaking has completed or an error occurs.
  */
-export const speakAssistantMessage = async (text: string): Promise<void> => {
+export const speakAssistantMessage = async (text: string, maxChars?: number): Promise<void> => {
   if (!client) {
     console.warn('Cartesia client not initialized. Cannot speak message.');
     return;
   }
   if (!text) {
     console.warn('No text provided to speak.');
+    return;
+  }
+
+  // Process text to strip code and symbols
+  const processed = processTextForTTS(text, maxChars);
+  const spokenText = processed.spokenText;
+
+  if (!spokenText) {
+    console.warn('No speakable text after processing.');
     return;
   }
 
@@ -53,7 +63,7 @@ export const speakAssistantMessage = async (text: string): Promise<void> => {
     // TODO: Make modelId and voice.id configurable (e.g., via .env or app settings)
     // Using example values from cartesia-js documentation for now.
     const modelId = import.meta.env.VITE_CARTESIA_MODEL_ID || 'sonic-2';
-    const voiceId = import.meta.env.VITE_CARTESIA_VOICE_ID || 'a0e99841-438c-4a64-b679-ae501e7d6091';
+    const voiceId = import.meta.env.VITE_CARTESIA_VOICE_ID || '33fdfe6e-4f35-4779-9563-700dee55a43a';
 
     const ttsResponse = await websocket.send({
       modelId: modelId,
@@ -61,7 +71,7 @@ export const speakAssistantMessage = async (text: string): Promise<void> => {
         mode: 'id' as const,
         id: voiceId,
       },
-      transcript: text,
+      transcript: spokenText,
     });
 
     const player = new WebPlayer({ bufferDuration: 1000 });

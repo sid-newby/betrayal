@@ -10,6 +10,7 @@ export interface AIConfig {
   systemPrompt: string;
   maxTokens?: number;
   temperature?: number;
+  maxSpokenChars?: number;
 }
 
 export interface AIResponse {

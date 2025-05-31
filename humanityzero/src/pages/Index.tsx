@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { ChatMessage, ChatInput, useChatWithAI } from '@/modules/chat';
+import { MarkdownChatMessage, ChatInput, useChatWithAI } from '@/modules/chat';
 import { MicrophoneButton } from '@/modules/voice';
 import { SettingsDrawer, AppConfig } from '@/modules/settings';
 
@@ -60,7 +60,7 @@ const Index = () => {
         <ScrollArea className="flex-1 p-4">
           <div className="max-w-4xl mx-auto">
             {messages.map((message) => (
-              <ChatMessage key={message.id} message={message} />
+              <MarkdownChatMessage key={message.id} message={message} />
             ))}
             {isLoading && (
               <div className="flex justify-start mb-4">

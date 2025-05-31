@@ -13,6 +13,7 @@ export interface AnthropicConfig {
   thinkingBudget: number;
   systemPrompt: string;
   maxTokens?: number;
+  maxSpokenChars?: number;
 }
 
 export interface ChatMessage {

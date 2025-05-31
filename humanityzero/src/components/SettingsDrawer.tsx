@@ -97,6 +97,21 @@ export const SettingsDrawer = ({ config, onConfigChange }: SettingsDrawerProps) 
               placeholder="Enter your system prompt here..."
             />
           </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="maxSpokenChars" className="text-white">Max Spoken Characters</Label>
+            <Input
+              id="maxSpokenChars"
+              type="number"
+              value={config.maxSpokenChars || 500}
+              onChange={(e) => updateConfig({ maxSpokenChars: parseInt(e.target.value) || 500 })}
+              className="bg-black border-white text-white focus:ring-accent"
+              min="50"
+              max="5000"
+              step="50"
+            />
+            <p className="text-xs text-gray-400">Limits the number of characters sent to text-to-speech. Code and symbols will be stripped.</p>
+          </div>
         </div>
       </SheetContent>
     </Sheet>
