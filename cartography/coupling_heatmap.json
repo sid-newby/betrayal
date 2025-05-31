@@ -1,0 +1,162 @@
+{
+  "components": {
+    "ChatInterface": {
+      "coupling_scores": {
+        "ChatInput": 8,
+        "ChatMessage": 7,
+        "MicrophoneButton": 6,
+        "useAnthropicChat": 9,
+        "speech-synthesis": 7,
+        "utils": 4
+      },
+      "coupling_types": {
+        "ChatInput": ["control", "data"],
+        "ChatMessage": ["data", "control"],
+        "MicrophoneButton": ["control"],
+        "useAnthropicChat": ["data", "control", "external"],
+        "speech-synthesis": ["external", "control"],
+        "utils": ["stamp"]
+      }
+    },
+    "ChatInput": {
+      "coupling_scores": {
+        "useAnthropicChat": 9,
+        "use-mobile": 5,
+        "utils": 4,
+        "ui/input": 3,
+        "ui/button": 3
+      },
+      "coupling_types": {
+        "useAnthropicChat": ["data", "control", "external"],
+        "use-mobile": ["data"],
+        "utils": ["stamp"],
+        "ui/input": ["content"],
+        "ui/button": ["content"]
+      }
+    },
+    "MicrophoneButton": {
+      "coupling_scores": {
+        "speech-recognition": 8,
+        "ui/button": 3,
+        "utils": 4
+      },
+      "coupling_types": {
+        "speech-recognition": ["external", "control"],
+        "ui/button": ["content"],
+        "utils": ["stamp"]
+      }
+    },
+    "SettingsDrawer": {
+      "coupling_scores": {
+        "use-toast": 5,
+        "ui/drawer": 3,
+        "utils": 4
+      },
+      "coupling_types": {
+        "use-toast": ["control"],
+        "ui/drawer": ["content"],
+        "utils": ["stamp"]
+      }
+    },
+    "useAnthropicChat": {
+      "coupling_scores": {
+        "anthropic.types": 7,
+        "Anthropic API": 9
+      },
+      "coupling_types": {
+        "anthropic.types": ["data", "stamp"],
+        "Anthropic API": ["external", "data", "control"]
+      }
+    },
+    "speech-recognition": {
+      "coupling_scores": {
+        "speech.d.ts": 6,
+        "Browser API": 8
+      },
+      "coupling_types": {
+        "speech.d.ts": ["data"],
+        "Browser API": ["external", "control"]
+      }
+    },
+    "speech-synthesis": {
+      "coupling_scores": {
+        "speech.d.ts": 6,
+        "Browser API": 8
+      },
+      "coupling_types": {
+        "speech.d.ts": ["data"],
+        "Browser API": ["external", "control"]
+      }
+    },
+    "App": {
+      "coupling_scores": {
+        "Index": 5,
+        "theme": 6,
+        "routing": 6
+      },
+      "coupling_types": {
+        "Index": ["control"],
+        "theme": ["data", "control"],
+        "routing": ["control", "content"]
+      }
+    }
+  },
+  "clusters": {
+    "chat": {
+      "components": ["ChatInterface", "ChatInput", "ChatMessage"],
+      "average_score": 8,
+      "breaking_difficulty": "high",
+      "extraction_priority": "P0"
+    },
+    "speech": {
+      "components": ["MicrophoneButton", "speech-recognition", "speech-synthesis"],
+      "average_score": 7.3,
+      "breaking_difficulty": "medium",
+      "extraction_priority": "P1"
+    },
+    "settings": {
+      "components": ["SettingsDrawer", "use-toast"],
+      "average_score": 4,
+      "breaking_difficulty": "low",
+      "extraction_priority": "P2"
+    },
+    "providers": {
+      "components": ["useAnthropicChat", "speech-recognition", "speech-synthesis"],
+      "average_score": 8.3,
+      "breaking_difficulty": "high",
+      "extraction_priority": "P0"
+    }
+  },
+  "breaking_order": [
+    {
+      "target": "provider_interfaces",
+      "components": ["useAnthropicChat", "speech-recognition", "speech-synthesis"],
+      "reason": "Highest coupling scores and most critical for modularity"
+    },
+    {
+      "target": "chat_components",
+      "components": ["ChatInterface", "ChatInput", "ChatMessage"],
+      "reason": "High internal coupling and dependent on provider interfaces"
+    },
+    {
+      "target": "speech_components",
+      "components": ["MicrophoneButton"],
+      "reason": "Depends on speech provider interfaces"
+    },
+    {
+      "target": "app_structure",
+      "components": ["App", "theme", "routing"],
+      "reason": "Moderate coupling but affects entire application"
+    }
+  ],
+  "metrics": {
+    "highest_coupling": 9,
+    "average_coupling": 6.2,
+    "most_coupled_component": "ChatInterface",
+    "healthiest_component": "ui/components",
+    "critical_paths": [
+      "ChatInput -> useAnthropicChat -> Anthropic API",
+      "MicrophoneButton -> speech-recognition -> Browser API"
+    ]
+  }
+}

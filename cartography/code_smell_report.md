@@ -1,168 +1,159 @@
-# Code Smell Report: HUMANITYZERO
+# Code Smell Report
 
-## Critical Violations
+## High Severity (8-10)
 
 ### God Components
-1. Index.tsx (Severity: 8/10)
-   - Manages chat state
-   - Handles speech recognition
-   - Controls settings drawer
-   - Manages model config
-   - Fix: Extract into specialized components
+1. **ChatInterface**
+- **Severity**: 9/10
+- **Location**: Multiple components tightly coupled
+- **Issues**:
+  - Manages too many responsibilities
+  - Direct provider dependencies
+  - State management scattered
+- **Fix Pattern**: Extract into smaller, focused components
+
+2. **App.tsx**
+- **Severity**: 8/10
+- **Location**: [`App.tsx`](humanityzero/src/App.tsx)
+- **Issues**:
+  - Multiple initialization responsibilities
+  - Theme and routing mixed
+  - Layout concerns not separated
+- **Fix Pattern**: Extract providers and layout components
 
 ### Inappropriate Intimacy
-1. useAnthropicChat ↔ Index.tsx (Severity: 9/10)
-   - Hook knows too much about component state
-   - Direct window object access
-   - Fix: Proper service abstraction
+1. **ChatInput ↔ useAnthropicChat**
+- **Severity**: 9/10
+- **Location**: [`ChatInput.tsx`](humanityzero/src/components/ChatInput.tsx)
+- **Issues**:
+  - Direct knowledge of Anthropic implementation
+  - Tightly coupled to provider details
+- **Fix Pattern**: Introduce provider interface
+
+2. **Speech Services Coupling**
+- **Severity**: 8/10
+- **Location**: [`speech-recognition.ts`](humanityzero/src/services/speech-recognition.ts), [`speech-synthesis.ts`](humanityzero/src/services/speech-synthesis.ts)
+- **Issues**:
+  - Direct browser API coupling
+  - Shared implementation details
+- **Fix Pattern**: Create speech provider interface
+
+## Medium Severity (5-7)
 
 ### Feature Envy
-1. SettingsDrawer → AnthropicConfig (Severity: 7/10)
-   - Drawer directly manipulates model config
-   - Fix: Introduce configuration service
+1. **MicrophoneButton**
+- **Severity**: 7/10
+- **Location**: [`MicrophoneButton.tsx`](humanityzero/src/components/MicrophoneButton.tsx)
+- **Issues**:
+  - Too much knowledge of speech services
+  - Handles speech state management
+- **Fix Pattern**: Move speech logic to dedicated hook
 
-## Architectural Violations
+2. **SettingsDrawer**
+- **Severity**: 6/10
+- **Location**: [`SettingsDrawer.tsx`](humanityzero/src/components/SettingsDrawer.tsx)
+- **Issues**:
+  - Manages multiple settings domains
+  - Direct toast implementation knowledge
+- **Fix Pattern**: Split into domain-specific settings
 
-### State Management
-1. Local State Abuse
-   - Message state in useAnthropicChat
-   - Config state in Index.tsx
-   - Fix: Implement global state management
+### Divergent Change
+1. **ChatMessage**
+- **Severity**: 6/10
+- **Location**: [`ChatMessage.tsx`](humanityzero/src/components/ChatMessage.tsx)
+- **Issues**:
+  - Changes for both styling and content
+  - Mixed rendering responsibilities
+- **Fix Pattern**: Separate content and presentation
 
-### Type Safety
-1. Window Object Access
-   - Direct manipulation without types
-   - Fix: Create typed service interfaces
+2. **useAnthropicChat**
+- **Severity**: 7/10
+- **Location**: [`useAnthropicChat.ts`](humanityzero/src/hooks/useAnthropicChat.ts)
+- **Issues**:
+  - Changes for API updates and UI state
+  - Mixed error handling
+- **Fix Pattern**: Split into API and UI layers
 
-### Component Boundaries
-1. Responsibility Leaks
-   - Chat logic in UI components
-   - Speech handling scattered
-   - Fix: Extract domain services
+## Low Severity (1-4)
 
-## Modularization Opportunities
+### Shotgun Surgery
+1. **Theme Changes**
+- **Severity**: 4/10
+- **Location**: Multiple style files
+- **Issues**:
+  - Theme changes require multiple file updates
+  - No centralized theme management
+- **Fix Pattern**: Create theme provider
 
-### Service Layer
-```typescript
-// Proposed Structure
-src/
-  services/
-    anthropic/
-      client.ts
-      types.ts
-      config.ts
-    speech/
-      recognition.ts
-      synthesis.ts
-    vectorStore/
-      client.ts
-      embeddings.ts
-```
+2. **Toast Notifications**
+- **Severity**: 3/10
+- **Location**: Multiple components
+- **Issues**:
+  - Scattered toast implementations
+  - Inconsistent error handling
+- **Fix Pattern**: Centralize toast management
 
-### State Management
-```typescript
-// Proposed Structure
-src/
-  store/
-    chat/
-      messages.ts
-      config.ts
-    audio/
-      speech.ts
-    settings/
-      drawer.ts
-```
+### Data Clumps
+1. **Speech Options**
+- **Severity**: 3/10
+- **Location**: Speech service files
+- **Issues**:
+  - Repeated configuration objects
+  - Duplicated option types
+- **Fix Pattern**: Create shared configuration types
 
-### Component Extraction
-```typescript
-// Proposed Structure
-src/
-  components/
-    chat/
-      MessageList.tsx
-      InputArea.tsx
-    audio/
-      SpeechControls.tsx
-    settings/
-      ConfigPanel.tsx
-```
+## Refactoring Priorities
 
-## Quick Wins
+### P0 (Immediate)
+1. Extract provider interfaces
+2. Break ChatInterface into smaller components
+3. Implement proper state management
 
-1. Extract Speech Services
-   - Create proper TypeScript interfaces
-   - Remove window object access
-   - Implement error handling
+### P1 (High Priority)
+1. Separate App.tsx concerns
+2. Create speech service abstraction
+3. Centralize error handling
 
-2. Centralize State
-   - Implement store for messages
-   - Implement store for config
-   - Remove local state management
+### P2 (Medium Priority)
+1. Split settings by domain
+2. Extract theme management
+3. Standardize toast notifications
 
-3. Split Index.tsx
-   - Extract chat container
-   - Extract audio controls
-   - Extract settings management
+### P3 (Low Priority)
+1. Consolidate configuration types
+2. Improve component composition
+3. Enhance error boundaries
 
-## Long-term Fixes
+## Impact Analysis
 
-1. Service Layer Implementation
-   - Create proper Anthropic client
-   - Implement speech services
-   - Add vector store integration
+### High Impact Areas
+- Chat functionality
+- Speech recognition
+- Provider integration
+- User settings
 
-2. Component Boundary Enforcement
-   - Strict interface definitions
-   - Clear responsibility separation
-   - Proper dependency injection
+### Low Impact Areas
+- Theme configuration
+- Toast notifications
+- Error boundaries
+- Type definitions
 
-3. State Architecture
-   - Global state management
-   - Type-safe actions
-   - Proper error handling
+## Success Metrics
 
-## Risk Assessment
+### Code Quality
+- Max component size: 200 lines
+- Max file responsibilities: 3
+- Test coverage: > 80%
+- TypeScript strictness: 100%
 
-### Breaking Changes
-1. State Management Migration
-   - Impact: High
-   - Scope: Full application
-   - Mitigation: Incremental migration
+### Maintainability
+- Clear component boundaries
+- Standardized error handling
+- Centralized state management
+- Provider-agnostic interfaces
 
-2. Service Extraction
-   - Impact: Medium
-   - Scope: Core functionality
-   - Mitigation: Interface adapters
-
-3. Component Splitting
-   - Impact: Low
-   - Scope: UI layer
-   - Mitigation: Parallel implementation
-
-### Technical Debt Cost
-1. Current State
-   - Maintenance Cost: High
-   - Bug Risk: Critical
-   - Development Speed: Impaired
-
-2. After Fixes
-   - Maintenance Cost: Low
-   - Bug Risk: Minimal
-   - Development Speed: Optimal
-
-## Action Plan
-
-### Phase 1: Foundation
-1. Create service interfaces
-2. Implement state management
-3. Extract core services
-
-### Phase 2: Cleanup
-1. Migrate to services
-2. Split components
-3. Remove local state
-
-### Phase 3: Enhancement
-1. Add error boundaries
-2. Implement monitoring
-3. Add test coverage
+### Performance
+- Reduced bundle size
+- Faster component updates
+- Efficient error recovery
+- Optimized re-renders

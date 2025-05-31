@@ -1,51 +1,60 @@
 graph TD
-    %% Core Application Flow
+    %% Main Application Flow
     A[App.tsx] -->|routes to| B[Index.tsx]
-    B -->|uses| C[useAnthropicChat]
-    
+    B -->|renders| C[ChatInterface]
+
     %% Chat Components
-    B -->|renders| D[ChatMessage]
-    B -->|renders| E[ChatInput]
-    B -->|renders| F[MicrophoneButton]
-    B -->|renders| G[SettingsDrawer]
-    
-    %% State Management
-    C -->|manages| H["Local Message State<br/>(needs centralization)"]
-    G -->|manages| I["Config State<br/>(needs centralization)"]
-    
-    %% Model Integration
-    C -->|simulated| J["Anthropic API<br/>(pseudocode)"]
-    C -->|uses| K["Window.speakText<br/>(unsafe global)"]
-    
-    %% Audio Handling
-    F -->|controls| L["Speech Recognition<br/>(incomplete)"]
-    F -->|triggers| M["Speech Synthesis<br/>(incomplete)"]
-    
-    %% Data Flow
-    N["Supabase Auth<br/>(not implemented)"] -.->|planned| B
-    O["Vector Store<br/>(not implemented)"] -.->|planned| C
-    
-    %% Style Dependencies
-    P[App.css] -->|styles| B
-    Q[tailwind] -->|styles| B
+    C -->|uses| D[ChatInput]
+    C -->|uses| E[ChatMessage]
+    C -->|uses| F[MicrophoneButton]
+    C -->|uses| G[SettingsDrawer]
 
-    %% Critical Issues
-    subgraph "Pseudocode Implementations"
-        J
-        K
-        L
-        M
-    end
+    %% Service Integration
+    D -->|hooks| H[useAnthropicChat]
+    F -->|uses| I[speech-recognition]
+    C -->|uses| J[speech-synthesis]
 
-    subgraph "Missing Core Features"
-        N
-        O
-    end
+    %% State and Utils
+    H -->|types| K[anthropic.types]
+    D -->|uses| L[use-mobile]
+    G -->|uses| M[use-toast]
 
-    %% Coupling Issues
-    style H fill:#ff6b6b
-    style I fill:#ff6b6b
-    style J fill:#ffd93d
-    style K fill:#ff6b6b
-    style L fill:#ffd93d
-    style M fill:#ffd93d
+    %% UI Components
+    D -->|uses| N[ui/input]
+    D -->|uses| O[ui/button]
+    E -->|uses| P[ui/avatar]
+    G -->|uses| Q[ui/drawer]
+    
+    %% Service Dependencies
+    I -->|implements| R[speech.d.ts]
+    J -->|implements| R
+    H -->|external| S[Anthropic API]
+
+    %% Utility Dependencies
+    T[utils.ts] -->|used by| D
+    T -->|used by| E
+    T -->|used by| C
+
+    %% State Management Concerns
+    U[Local State] -.->|scattered in| C
+    U -.->|scattered in| D
+    U -.->|scattered in| G
+
+    %% Potential Circular Dependencies
+    C -.->|potential circular| D
+    D -.->|potential circular| H
+    H -.->|potential circular| C
+
+    %% Missing Abstractions
+    V[Missing Provider<br/>Interface] -.->|needed| H
+    W[Missing Speech<br/>Interface] -.->|needed| I
+    W -.->|needed| J
+
+    %% Style Coupling
+    X[App.css] -->|styles| A
+    Y[index.css] -->|global styles| Z[main.tsx]
+
+    %% Suboptimal Patterns
+    style V fill:#ff9999
+    style W fill:#ff9999
+    style U fill:#ffcc99

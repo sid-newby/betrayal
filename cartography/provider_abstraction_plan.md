@@ -1,275 +1,178 @@
-# Provider Abstraction Plan: Anthropic Integration
+# Provider Abstraction Plan
 
-## Current Issues
+## Current Architecture Issues
 
-### Architecture Violations
-1. Direct API coupling in hook layer
-2. Missing provider abstraction
-3. Hardcoded model configuration
-4. Unsafe type assertions
-5. Inconsistent error handling
+### Direct Anthropic Coupling
+- [`useAnthropicChat.ts`](humanityzero/src/hooks/useAnthropicChat.ts) directly implements Anthropic API
+- No abstraction layer for different AI providers
+- Tight coupling between UI and specific provider implementation
 
-### Implementation Gaps
-1. Missing real API integration
-2. No response type safety
-3. Absent error boundaries
-4. Missing state persistence
-5. Incomplete speech integration
+### Speech Service Integration
+- Direct browser API usage in speech services
+- No provider-agnostic interface
+- Duplicate error handling logic
 
-## Provider Interface
+## Proposed Provider Interface
 
-### Core Types
+### AI Provider Interface
 ```typescript
-interface ModelProvider {
-  sendMessage(message: string): Promise<ModelResponse>;
-  getConfig(): ModelConfig;
-  updateConfig(config: Partial<ModelConfig>): void;
-  clearContext(): void;
+interface AIProvider {
+  chat(message: string, options?: ChatOptions): Promise<ChatResponse>;
+  stream(message: string, options?: StreamOptions): AsyncIterator<StreamChunk>;
+  abort(): void;
 }
 
-interface ModelConfig {
-  model: string;
-  thinking: boolean;
-  thinkingBudget?: number;
-  systemPrompt: string;
+interface ChatOptions {
   temperature?: number;
   maxTokens?: number;
+  systemPrompt?: string;
 }
 
-interface ModelResponse {
-  id: string;
+interface ChatResponse {
   content: string;
-  role: 'assistant';
-  timestamp: Date;
-  usage?: TokenUsage;
+  usage: {
+    promptTokens: number;
+    completionTokens: number;
+    totalTokens: number;
+  };
 }
 ```
 
-### Implementation Strategy
-
-#### 1. Provider Factory
+### Speech Provider Interface
 ```typescript
-Location: src/services/model/providerFactory.ts
-Purpose: Create provider instances
-Pattern: Factory + Strategy
-Dependencies: Provider implementations
+interface SpeechProvider {
+  recognize(options?: RecognitionOptions): Promise<string>;
+  speak(text: string, options?: SpeechOptions): Promise<void>;
+  abort(): void;
+}
+
+interface RecognitionOptions {
+  language?: string;
+  continuous?: boolean;
+  interimResults?: boolean;
+}
+
+interface SpeechOptions {
+  voice?: string;
+  rate?: number;
+  pitch?: number;
+}
 ```
 
-#### 2. Base Provider
+## Implementation Strategy
+
+### Phase 1: Interface Creation
+1. Create provider interfaces
+2. Define common types
+3. Document provider requirements
+
+### Phase 2: Adapter Implementation
+1. Anthropic Adapter
 ```typescript
-Location: src/services/model/baseProvider.ts
-Purpose: Common provider functionality
-Pattern: Abstract class
-Dependencies: Core types
+class AnthropicAdapter implements AIProvider {
+  // Wrap existing Anthropic implementation
+}
 ```
 
-#### 3. Anthropic Provider
+2. Browser Speech Adapter
 ```typescript
-Location: src/services/model/providers/anthropic.ts
-Purpose: Anthropic-specific implementation
-Pattern: Concrete provider
-Dependencies: Anthropic SDK
+class BrowserSpeechAdapter implements SpeechProvider {
+  // Wrap existing browser APIs
+}
 ```
 
-## Service Layer
-
-### 1. Message Service
+### Phase 3: Provider Factory
 ```typescript
-Location: src/services/message/messageService.ts
-Purpose: Message handling and formatting
-Pattern: Service class
-Dependencies: Provider interface
+class AIProviderFactory {
+  static create(type: 'anthropic' | 'other'): AIProvider;
+}
+
+class SpeechProviderFactory {
+  static create(type: 'browser' | 'other'): SpeechProvider;
+}
 ```
 
-### 2. Config Service
+### Phase 4: Hook Refactoring
 ```typescript
-Location: src/services/config/configService.ts
-Purpose: Model configuration management
-Pattern: Service class
-Dependencies: Local storage
+function useAIChat(provider: AIProvider) {
+  // Provider-agnostic chat implementation
+}
+
+function useSpeech(provider: SpeechProvider) {
+  // Provider-agnostic speech implementation
+}
 ```
 
-### 3. Speech Service
-```typescript
-Location: src/services/speech/speechService.ts
-Purpose: Voice interaction handling
-Pattern: Service class
-Dependencies: Web Speech API
-```
+## Migration Path
 
-## State Management
+### Step 1: Interface Layer (XS)
+- Create interfaces directory
+- Define provider contracts
+- Add type documentation
 
-### 1. Model Store
-```typescript
-Location: src/stores/modelStore.ts
-Purpose: Provider state management
-Pattern: Zustand store
-Dependencies: Provider interface
-```
+### Step 2: Adapter Layer (S)
+- Create adapters directory
+- Implement Anthropic adapter
+- Implement browser speech adapter
+- Add unit tests
 
-### 2. Message Store
-```typescript
-Location: src/stores/messageStore.ts
-Purpose: Chat history management
-Pattern: Zustand store
-Dependencies: Message types
-```
+### Step 3: Factory Layer (XS)
+- Create factories
+- Add provider configuration
+- Implement provider selection
 
-### 3. Config Store
-```typescript
-Location: src/stores/configStore.ts
-Purpose: Configuration persistence
-Pattern: Zustand store
-Dependencies: Config service
-```
+### Step 4: Hook Migration (M)
+- Update useAnthropicChat
+- Update speech hooks
+- Add integration tests
 
-## Error Handling
-
-### 1. Error Types
-```typescript
-Location: src/types/errors.ts
-Purpose: Custom error definitions
-Pattern: Error classes
-Dependencies: None
-```
-
-### 2. Error Boundaries
-```typescript
-Location: src/components/ErrorBoundary.tsx
-Purpose: React error catching
-Pattern: Error boundary
-Dependencies: Error types
-```
-
-### 3. Error Service
-```typescript
-Location: src/services/error/errorService.ts
-Purpose: Error tracking and reporting
-Pattern: Service class
-Dependencies: Error tracking
-```
-
-## Migration Strategy
-
-### Phase 1: Core Infrastructure
-1. Create provider interface
-2. Implement base provider
-3. Add error handling
-4. Setup state management
-
-### Phase 2: Anthropic Integration
-1. Implement Anthropic provider
-2. Add message handling
-3. Setup configuration
-4. Add error tracking
-
-### Phase 3: Feature Integration
-1. Add speech service
-2. Implement persistence
-3. Add error boundaries
-4. Setup monitoring
-
-### Phase 4: Hook Migration
-1. Update useAnthropicChat
-2. Add provider selection
-3. Implement error handling
-4. Add state management
+### Step 5: Component Updates (M)
+- Refactor ChatInput
+- Update MicrophoneButton
+- Modify speech service usage
 
 ## Success Metrics
 
 ### Code Quality
-- 100% TypeScript coverage
-- No any types
-- Full error handling
-- Complete test coverage
-
-### Performance
-- < 100ms provider initialization
-- < 200ms message processing
-- < 50ms state updates
-- Zero uncaught errors
+- Interface coverage: 100%
+- Adapter test coverage: > 90%
+- No direct provider imports in components
+- Zero TypeScript any types
 
 ### Maintainability
-- Clear provider boundaries
-- Centralized configuration
-- Consistent error handling
-- Proper type safety
+- Single responsibility per file
+- Clear dependency boundaries
+- Documented provider interfaces
+- Easy provider swapping
 
-## Implementation Notes
+### Performance
+- No regression in response times
+- Minimal adapter overhead
+- Efficient resource cleanup
 
-### Provider Setup
-```typescript
-// Example provider initialization
-const provider = ProviderFactory.create({
-  type: 'anthropic',
-  config: {
-    model: 'claude-sonnet-4',
-    thinking: false,
-    systemPrompt: defaultPrompt
-  }
-});
-```
-
-### Error Handling
-```typescript
-// Example error boundary usage
-<ModelErrorBoundary
-  fallback={ErrorDisplay}
-  onError={errorService.track}
->
-  <ModelProvider />
-</ModelErrorBoundary>
-```
-
-### State Management
-```typescript
-// Example store integration
-const useModelStore = create<ModelState>((set) => ({
-  provider: null,
-  setProvider: (provider) => set({ provider }),
-  config: defaultConfig,
-  updateConfig: (config) => set((state) => ({
-    config: { ...state.config, ...config }
-  }))
-}));
-```
-
-## Breaking Changes
+## Risk Assessment
 
 ### High Risk
-1. Provider interface changes
-2. Message format updates
-3. Configuration structure
-4. Error handling patterns
+- Breaking changes to chat functionality
+- Speech recognition interruptions
+- Stream handling modifications
 
-### Medium Risk
-1. State management
-2. Speech integration
-3. Storage format
-4. Type definitions
+### Mitigation
+1. Feature flags for new implementation
+2. Parallel provider support
+3. Comprehensive integration tests
+4. Gradual component migration
+5. Rollback procedures documented
 
-### Low Risk
-1. UI components
-2. Error displays
-3. Loading states
-4. Helper functions
+## Future Expansion
 
-## Rollback Strategy
+### Additional Providers
+- OpenAI integration ready
+- Azure Speech Services support
+- Local model capabilities
 
-### Feature Flags
-1. Provider selection
-2. Speech integration
-3. Error tracking
-4. State persistence
-
-### Backup Points
-1. Pre-provider extraction
-2. Pre-state migration
-3. Pre-speech integration
-4. Pre-error handling
-
-### Recovery Steps
-1. Revert provider changes
-2. Restore state handling
-3. Disable features
-4. Enable fallbacks
+### Enhanced Features
+- Provider fallback chains
+- Automatic provider selection
+- Performance monitoring
+- Usage analytics

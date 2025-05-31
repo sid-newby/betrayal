@@ -1,110 +1,110 @@
 {
-  "critical_violations": [
+  "critical_implementations": [
     {
-      "location": "src/hooks/useAnthropicChat.ts:33-41",
-      "type": "fake_implementation",
-      "description": "Simulated API response instead of real Anthropic integration",
-      "risk": "Production readiness blocked",
+      "id": "PSEUDO-001",
+      "location": "src/hooks/useAnthropicChat.ts:37-41",
+      "type": "placeholder_config",
+      "toxicity": "critical",
+      "description": "Default system prompt and maxTokens using hardcoded values instead of proper configuration",
+      "dependencies": [
+        "AnthropicConfig type definition",
+        "Environment configuration"
+      ],
       "fix_priority": "P0",
-      "required_implementation": "Anthropic API client with proper error handling"
+      "fix_complexity": "medium",
+      "fix_steps": [
+        "Add proper type definitions for systemPrompt and maxTokens in AnthropicConfig",
+        "Implement environment-based configuration",
+        "Add validation for required config values"
+      ]
     },
     {
-      "location": "src/hooks/useAnthropicChat.ts:47-49",
-      "type": "unsafe_global",
-      "description": "Direct window object access for speech synthesis",
-      "risk": "Type safety violation, runtime errors",
+      "id": "PSEUDO-002",
+      "location": "src/hooks/useAnthropicChat.ts:57-59",
+      "type": "commented_feature",
+      "toxicity": "high",
+      "description": "Tools and betas implementation deferred to 'Phase 2' with no actual implementation",
+      "dependencies": [
+        "Anthropic API configuration",
+        "Tool definitions",
+        "Beta feature flags"
+      ],
+      "fix_priority": "P1",
+      "fix_complexity": "high",
+      "fix_steps": [
+        "Define tool interfaces based on README examples",
+        "Implement tool handlers",
+        "Add beta feature configuration"
+      ]
+    },
+    {
+      "id": "PSEUDO-003",
+      "location": "src/hooks/useAnthropicChat.ts:68-71",
+      "type": "stub_implementation",
+      "toxicity": "critical",
+      "description": "Tool use handling returns placeholder message instead of actual implementation",
+      "dependencies": [
+        "Tool response handling",
+        "UI message display"
+      ],
       "fix_priority": "P0",
-      "required_implementation": "Proper speech synthesis service with TypeScript types"
-    }
-  ],
-  "high_risk_stubs": [
-    {
-      "location": "src/hooks/useAnthropicChat.ts:38-41",
-      "type": "placeholder_response",
-      "description": "Hardcoded message response template",
-      "dependencies": ["Anthropic API integration"],
-      "fix_priority": "P1"
-    },
-    {
-      "location": "src/components/MicrophoneButton.tsx",
-      "type": "incomplete_feature",
-      "description": "Speech recognition implementation missing",
-      "dependencies": ["Web Speech API", "Error handling"],
-      "fix_priority": "P1"
-    }
-  ],
-  "missing_core_features": [
-    {
-      "feature": "Supabase Authentication",
-      "status": "Not implemented",
-      "blocking": true,
-      "required_files": [
-        "src/lib/supabase.ts",
-        "src/hooks/useAuth.ts",
-        "src/components/AuthGuard.tsx"
+      "fix_complexity": "high",
+      "fix_steps": [
+        "Implement tool execution logic",
+        "Add proper error handling",
+        "Create tool response formatter"
       ]
     },
     {
-      "feature": "Vector Store Integration",
-      "status": "Not implemented",
-      "blocking": true,
-      "required_files": [
-        "src/lib/vectorStore.ts",
-        "src/hooks/useVectorStore.ts",
-        "src/services/embeddings.ts"
-      ]
-    },
-    {
-      "feature": "MCP Proxy Integration",
-      "status": "Not implemented",
-      "blocking": true,
-      "required_files": [
-        "src/lib/mcpProxy.ts",
-        "src/services/mcpConnection.ts"
-      ]
-    }
-  ],
-  "technical_debt": [
-    {
-      "location": "src/hooks/useAnthropicChat.ts",
-      "type": "local_state",
-      "description": "Message state should be centralized",
+      "id": "PSEUDO-004",
+      "location": "src/hooks/useAnthropicChat.ts:81-83",
+      "type": "commented_feature",
+      "toxicity": "medium",
+      "description": "Usage data tracking commented out without implementation",
+      "dependencies": [
+        "Usage tracking system",
+        "Metrics collection"
+      ],
       "fix_priority": "P2",
-      "migration_path": "Move to global state management"
-    },
-    {
-      "location": "src/pages/Index.tsx",
-      "type": "local_state",
-      "description": "Config state should be centralized",
-      "fix_priority": "P2",
-      "migration_path": "Move to global state management"
+      "fix_complexity": "medium",
+      "fix_steps": [
+        "Define usage tracking interface",
+        "Implement metrics collection",
+        "Add usage data storage"
+      ]
     }
   ],
-  "action_items": [
+  "verification_required": [
     {
-      "priority": "P0",
-      "task": "Implement real Anthropic API integration",
-      "files_to_create": [
-        "src/services/anthropic.ts",
-        "src/hooks/useAnthropicClient.ts"
+      "id": "VERIFY-001",
+      "location": "src/hooks/useAnthropicChat.ts:9",
+      "type": "api_key_handling",
+      "description": "Anthropic client instantiation assumes environment variable without verification",
+      "verification_steps": [
+        "Check if ANTHROPIC_API_KEY is properly set",
+        "Verify API key format",
+        "Add error handling for missing key"
       ]
     },
     {
-      "priority": "P0",
-      "task": "Implement proper speech services",
-      "files_to_create": [
-        "src/services/speech.ts",
-        "src/hooks/useSpeechSynthesis.ts",
-        "src/hooks/useSpeechRecognition.ts"
-      ]
-    },
-    {
-      "priority": "P1",
-      "task": "Implement authentication flow",
-      "files_to_create": [
-        "src/lib/supabase.ts",
-        "src/hooks/useAuth.ts"
+      "id": "VERIFY-002",
+      "location": "src/hooks/useAnthropicChat.ts:88-90",
+      "type": "external_service",
+      "description": "Speech synthesis called without checking browser support or user preferences",
+      "verification_steps": [
+        "Check browser compatibility",
+        "Verify user preferences",
+        "Add fallback handling"
       ]
     }
-  ]
+  ],
+  "safe_to_delete": [],
+  "metadata": {
+    "total_issues": 6,
+    "critical_count": 2,
+    "high_priority_count": 1,
+    "medium_priority_count": 2,
+    "low_priority_count": 1,
+    "last_updated": "2025-05-30T21:55:49-05:00"
+  }
 }
