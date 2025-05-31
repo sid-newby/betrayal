@@ -51,11 +51,36 @@ export const EnhancedChatMessage = ({ message }: EnhancedChatMessageProps) => {
             </span>
           </span>
         );
+      } else if (segment.originalContent?.includes('function_calls') || 
+                 segment.originalContent?.includes('invoke') || 
+                 segment.originalContent?.includes('parameter')) {
+        // Function call XML - render as syntax highlighted
+        return (
+          <div key={index} className="my-2">
+            <SyntaxHighlighter
+              language="xml"
+              style={vscDarkPlus}
+              customStyle={{
+                backgroundColor: 'rgba(255, 215, 0, 0.1)',
+                border: '1px solid gold',
+                borderRadius: '4px',
+                fontSize: '0.875rem',
+                maxHeight: '200px',
+                overflow: 'auto'
+              }}
+            >
+              {segment.originalContent}
+            </SyntaxHighlighter>
+            <span className="text-xs text-yellow-500 opacity-75">
+              [function call - not spoken]
+            </span>
+          </div>
+        );
       } else {
         // Other stripped content (symbols)
         return (
           <span key={index} className="text-yellow-500 opacity-75">
-            {segment.content}
+            {segment.originalContent}
           </span>
         );
       }

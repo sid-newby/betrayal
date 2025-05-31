@@ -2,20 +2,21 @@ import { useState, useRef, useEffect } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { MarkdownChatMessage, ChatInput, useChatWithAI } from '@/modules/chat';
 import { MicrophoneButton } from '@/modules/voice';
-import { SettingsDrawer, AppConfig } from '@/modules/settings';
+import { SettingsDrawer, AppConfig, configStorage } from '@/modules/settings';
 
 const Index = () => {
-  const [config, setConfig] = useState<AppConfig>({
-    model: 'claude-sonnet-4-20250514',
-    thinking: false,
-    thinkingBudget: 5000,
-    systemPrompt: 'You are a helpful AI assistant. Respond concisely and helpfully to user queries.',
-  });
+  // Load config from localStorage on mount
+  const [config, setConfig] = useState<AppConfig>(() => configStorage.load());
 
   const [isListening, setIsListening] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
   const { messages, isLoading, sendMessage } = useChatWithAI(config);
+
+  // Save config to localStorage whenever it changes
+  useEffect(() => {
+    configStorage.save(config);
+  }, [config]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });

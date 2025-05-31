@@ -11,138 +11,122 @@ export interface ProcessedText {
 }
 
 /**
- * Process text for TTS by stripping code blocks and symbols
+ * Process text for TTS by stripping code blocks, function calls, and symbols
  * Returns both the cleaned text and segments for display
  */
 export function processTextForTTS(text: string, maxChars?: number): ProcessedText {
   const segments: ProcessedTextSegment[] = [];
   
-  // Regex patterns for code detection
-  const codeBlockRegex = /```[\s\S]*?```/g;
-  const inlineCodeRegex = /`[^`]+`/g;
-  // Reduced symbol set - preserve periods and question marks for natural speech
-  const symbolsRegex = /[<>{}()[\]=+\-*/\\|&^%$#@!~;:'"]/g;
+  // Patterns to strip from voice output
+  const strippablePatterns = [
+    // Code blocks
+    { regex: /```[\s\S]*?```/g, name: 'code_block' },
+    // Inline code
+    { regex: /`[^`]+`/g, name: 'inline_code' },
+    // Function calls - XML style tags
+    { regex: /<function_calls[\s\S]*?<\/function_calls>/g, name: 'function_calls' },
+    { regex: /<invoke[\s\S]*?<\/invoke>/g, name: 'invoke' },
+    { regex: /<parameter[\s\S]*?<\/parameter>/g, name: 'parameter' }
+  ];
   
-  // First, handle code blocks
-  let processedText = text;
+  let workingText = text;
+  let allMatches: Array<{ match: RegExpMatchArray; type: string }> = [];
+  
+  // Find all matches from all patterns
+  strippablePatterns.forEach(pattern => {
+    const matches = Array.from(workingText.matchAll(pattern.regex));
+    matches.forEach(match => {
+      if (match.index !== undefined) {
+        allMatches.push({ match, type: pattern.name });
+      }
+    });
+  });
+  
+  // Sort matches by position
+  allMatches.sort((a, b) => a.match.index! - b.match.index!);
+  
   let lastIndex = 0;
   
-  // Process code blocks
-  const codeBlocks = [...text.matchAll(codeBlockRegex)];
-  codeBlocks.forEach(match => {
+  // Process each match in order
+  allMatches.forEach(({ match }) => {
     const startIndex = match.index!;
     
-    // Add text before code block
+    // Add text before this match as spoken content
     if (startIndex > lastIndex) {
       const beforeText = text.slice(lastIndex, startIndex);
-      segments.push({
-        type: 'spoken',
-        content: beforeText
-      });
+      if (beforeText.trim()) {
+        segments.push({
+          type: 'spoken',
+          content: beforeText
+        });
+      }
     }
     
-    // Add code block as stripped - don't include in spoken text
+    // Add the match as stripped content
     segments.push({
       type: 'stripped',
-      content: '', // Empty content for TTS
+      content: '', // Empty for TTS
       originalContent: match[0]
     });
     
     lastIndex = startIndex + match[0].length;
   });
   
-  // Add remaining text after last code block
+  // Add remaining text after last match
   if (lastIndex < text.length) {
     const remainingText = text.slice(lastIndex);
+    if (remainingText.trim()) {
+      segments.push({
+        type: 'spoken',
+        content: remainingText
+      });
+    }
+  }
+  
+  // If no matches found, treat entire text as spoken
+  if (allMatches.length === 0) {
     segments.push({
       type: 'spoken',
-      content: remainingText
+      content: text
     });
   }
   
-  // Process inline code in spoken segments
-  const processedSegments: ProcessedTextSegment[] = [];
-  segments.forEach(segment => {
-    if (segment.type === 'stripped') {
-      processedSegments.push(segment);
-      return;
-    }
-    
-    // Process inline code
-    let content = segment.content;
-    let segmentLastIndex = 0;
-    const inlineMatches = [...content.matchAll(inlineCodeRegex)];
-    
-    if (inlineMatches.length === 0) {
-      processedSegments.push(segment);
-      return;
-    }
-    
-    inlineMatches.forEach(match => {
-      const startIndex = match.index!;
-      
-      // Add text before inline code
-      if (startIndex > segmentLastIndex) {
-        const beforeText = content.slice(segmentLastIndex, startIndex);
-        processedSegments.push({
-          type: 'spoken',
-          content: beforeText
-        });
-      }
-      
-      // Add inline code as stripped - don't include in spoken text
-      processedSegments.push({
-        type: 'stripped',
-        content: '', // Empty content for TTS
-        originalContent: match[0]
-      });
-      
-      segmentLastIndex = startIndex + match[0].length;
-    });
-    
-    // Add remaining text
-    if (segmentLastIndex < content.length) {
-      processedSegments.push({
-        type: 'spoken',
-        content: content.slice(segmentLastIndex)
-      });
-    }
-  });
-  
-  // Strip symbols from spoken segments
-  const finalSegments = processedSegments.map(segment => {
+  // Clean up spoken segments by removing unwanted symbols
+  const cleanedSegments = segments.map(segment => {
     if (segment.type === 'stripped') {
       return segment;
     }
     
-    // Remove unwanted symbols but keep punctuation for natural speech
-    const strippedContent = segment.content
-      .replace(symbolsRegex, ' ')
+    // Remove symbols but preserve sentence structure
+    let cleanContent = segment.content
+      // Remove angle brackets and other programming symbols
+      .replace(/[<>{}\[\]=+\-*/\\|&^%$#@!~;]/g, ' ')
+      // Keep basic punctuation for natural speech
       .replace(/\s+/g, ' ')
       .trim();
     
     return {
       ...segment,
-      content: strippedContent
+      content: cleanContent
     };
   });
   
-  // Build spoken text - only include spoken segments
-  let spokenText = finalSegments
-    .filter(segment => segment.type === 'spoken' && segment.content)
-    .map(segment => segment.content)
+  // Build final spoken text
+  let spokenText = cleanedSegments
+    .filter(segment => segment.type === 'spoken' && segment.content.trim())
+    .map(segment => segment.content.trim())
     .join(' ')
     .replace(/\s+/g, ' ')
     .trim();
   
-  // Apply max character limit if specified
+  // Apply character limit if specified
   if (maxChars && spokenText.length > maxChars) {
     spokenText = spokenText.slice(0, maxChars - 3) + '...';
   }
   
   return {
     spokenText,
-    segments: finalSegments,
-    wasStripped: finalSegments.some(s => s.type === 'stripped')
+    segments: cleanedSegments,
+    wasStripped: cleanedSegments.some(s => s.type === 'stripped')
   };
 }

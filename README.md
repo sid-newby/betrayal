@@ -10,6 +10,7 @@ An agentic chat application with voice interaction, semantic memory, and thinkin
 - **Chat Interface**: Clean, responsive messaging with real-time responses
 - **Voice Interaction**: Toggle microphone for speech-to-text and text-to-speech
 - **AI Models**: Anthropic Claude Sonnet 4 and Opus 4 with thinking modes
+- **Web Search**: Native internet access through Anthropic's canonical web search tools
 - **Semantic Memory**: Automatic context storage and retrieval using vector embeddings
 - **MCP Integration**: Model Context Protocol support for extensible tool connectivity
 
@@ -22,6 +23,7 @@ An agentic chat application with voice interaction, semantic memory, and thinkin
 ### Model Configuration
 - **Sonnet 4**: Default model, 64k tokens, temperature 0/1 (thinking mode)
 - **Opus 4**: Alternative model, 32k tokens, temperature 0/1 (thinking mode)
+- **Web Search**: All models equipped with real-time internet search capabilities
 - **Thinking Mode**: Real-time thinking display with configurable token budgets
 - **System Prompts**: Customizable system prompts for all models
 
@@ -101,6 +103,12 @@ For technical details, architecture decisions, and development guidelines, see:
 - **Automatic**: Context automatically stored and retrieved
 - **Visual Indicators**: ⛧⃝ symbols show injected context
 - **Clickable Context**: Click symbols to view full context details
+
+### Web Search Integration
+- **Automatic Search**: Models decide when to search based on context
+- **Real-time Results**: Up-to-date information with source citations
+- **Location Aware**: Search results localized to Chicago timezone
+- **Rate Limited**: Maximum 5 searches per conversation for optimal performance
 
 ## Development
 

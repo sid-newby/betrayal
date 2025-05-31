@@ -58,10 +58,13 @@ const msg = await anthropic.beta.messages.create({
       }
     },
     {
-      "name": "web_search",
       "type": "web_search_20250305",
+      "name": "web_search",
+      "max_uses": 5,
       "user_location": {
         "type": "approximate",
+        "city": "Chicago",
+        "region": "Illinois",
         "country": "US",
         "timezone": "America/Chicago"
       }
@@ -70,7 +73,6 @@ const msg = await anthropic.beta.messages.create({
   thinking: {
     "type": "enabled",
     "budget_tokens": 5000
-  },
-  betas: ["web-search-2025-03-05"]
+  }
 });
 console.log(msg);

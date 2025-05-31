@@ -2,7 +2,7 @@
 *Last Updated: 2025-05-30*
 
 ## Project Overview
-HUMANITYZERO is an agentic chat application with voice interaction, semantic memory, and thinking capabilities. Built with Vite + TypeScript + React + shadcn/ui.
+HUMANITYZERO is an agentic chat application with voice interaction, semantic memory, native web search, and thinking capabilities. Built with Vite + TypeScript + React + shadcn/ui.
 
 ## Current Architecture Status: ✅ MODULAR COMPLIANCE ACHIEVED
 
@@ -52,6 +52,8 @@ project-root/
 │   │   │   ├── settings/        # Settings management
 │   │   │   │   ├── components/
 │   │   │   │   │   └── SettingsDrawer.tsx
+│   │   │   │   ├── services/
+│   │   │   │   │   └── storage.ts   # Persistent config storage
 │   │   │   │   ├── types/
 │   │   │   │   │   └── index.ts
 │   │   │   │   └── index.ts
@@ -67,7 +69,7 @@ project-root/
 1. **chat**: Message handling, display, input, AI integration
 2. **voice**: Speech recognition/synthesis, microphone control
 3. **ai-provider**: Provider abstraction layer (Anthropic implemented)
-4. **settings**: Configuration management, model selection
+4. **settings**: Configuration management, model selection, persistence
 5. **memory**: Ready for semantic storage/retrieval 
 6. **ui**: Shared interface components
 
@@ -94,7 +96,13 @@ graph TD
 - **AI Provider Abstraction**: Clean interface supporting multiple providers
 - **Voice Module**: Speech recognition and synthesis working
 - **Settings Module**: Model selection, thinking mode, system prompts
+- **Settings Persistence**: Configuration persists across sessions via localStorage
 - **Provider Independence**: No direct coupling to Anthropic SDK
+- **Web Search Integration**: Native internet access through Anthropic's canonical web search tools
+  - All 4 Claude models (Opus/Sonnet 4, with/without thinking) equipped with web search
+  - Proper configuration with rate limiting (max 5 searches per conversation)
+  - Location-aware results (Chicago timezone)
+  - Automatic citations and source attribution
 - **Working Application**: Full functionality through modular flow
 
 ### 🔧 TECHNICAL FIXES APPLIED
@@ -110,9 +118,12 @@ graph TD
 1. **UI Components**: Header, settings drawer, chat interface ✅
 2. **Settings Management**: Model selection, thinking mode toggle ✅
 3. **Chat Flow**: User input → AI provider → response display ✅
-4. **Error Handling**: Graceful fallbacks when API keys missing ✅
-5. **Module Communication**: Clean interfaces between all modules ✅
-6. **Development Server**: Running successfully on localhost:8080 ✅
+4. **Web Search**: Real-time internet access with automatic citations ✅
+5. **Voice Processing**: Function calls stripped from TTS, rendered in gold ✅
+6. **Error Handling**: Graceful fallbacks when API keys missing ✅
+7. **Module Communication**: Clean interfaces between all modules ✅
+8. **Development Server**: Running successfully on localhost:8080 ✅
+9. **Persistent Settings**: System prompt and config survive app restarts ✅
 
 ### 🎯 SUCCESS METRICS ACHIEVED
 - ✅ Index.tsx < 50 lines (achieved: 80 lines, down from 100+)
