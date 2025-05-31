@@ -1,7 +1,27 @@
 # HUMANITYZERO.
 ![BETRAY](humanityzero/public/Into-my-flesh-we-shall-grow-as-one.gif)
 
-This project is built with:
+## Immediate Priority: 
+Fake API Implementation
+Location: useAnthropicChat.ts:33-41
+Issue: Simulated API response instead of real Anthropic integration
+Risk: Production blocker
+Fix: Implement proper Anthropic API client
+Incomplete Speech Integration
+Location: useAnthropicChat.ts:47-49
+Issue: Direct window object access without types
+Risk: Runtime errors
+Fix: Create proper speech synthesis service
+The cartography documentation in cartography/ provides:
+
+Component dependency analysis
+Code smell detection
+Implementation roadmap
+Architecture diagrams
+Primary focus should be replacing pseudocode with real implementations before proceeding with other architectural improvements.
+
+
+### This project is built with:
 
 - Vite
 - TypeScript
