@@ -1,6 +1,9 @@
 # HUMANITYZERO.
 ![BETRAY](humanityzero/public/Into-my-flesh-we-shall-grow-as-one.gif)
 
+## Read the Cartography Documentation
+Blindness is not an excuse for mediocrity or foolishness. 
+
 ## Immediate Priority: 
 Fake API Implementation
 Location: useAnthropicChat.ts:33-41
